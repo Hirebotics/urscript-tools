@@ -1,0 +1,47 @@
+{
+  "name": "urscript-tools",
+  "version": "1.0.0",
+  "description": "Tool suite for developing in URScript",
+  "main": "index.js",
+  "scripts": {
+    "dist": "npx tsc && node dist/index.js",
+    "test": "npx jest",
+    "test-coverage": "npx jest --coverage",
+    "format": "npx prettier --write \"src/**/*.ts\""
+  },
+  "author": "Zach Boyd",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hirebotics/urscript-tools.git"
+  },
+  "keywords": [
+    "universal",
+    "robots",
+    "urscript"
+  ],
+  "bugs": {
+    "url": "https://github.com/Hirebotics/urscript-tools/issues"
+  },
+  "homepage": "https://github.com/Hirebotics/urscript-tools#readme",
+  "devDependencies": {
+    "@types/jest": "^24.0.18",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.3"
+  },
+  "dependencies": {
+    "@semantic-release/changelog": "^3.0.4",
+    "@semantic-release/git": "^7.0.16",
+    "chalk": "^2.4.2",
+    "glob": "^7.1.4",
+    "lodash": "^4.17.15",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.24.0",
+    "semantic-release": "^15.13.24",
+    "table": "^5.4.6",
+    "tail": "^2.0.3",
+    "winston": "^3.2.1"
+  }
+}
