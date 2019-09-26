@@ -139,23 +139,6 @@ export class BundleService implements IBundlerService {
       },
     } = this.config;
 
-    let gitInfo = '';
-
-    // extract to git utilities
-
-    if (appendGitCommitHash) {
-      /* const branchName = execSync(`git rev-parse --abbrev-ref HEAD`)
-        .toString()
-        .trim()
-        .replace(/_/g, '-')
-        .replace(/\//g, '-');
-
-      const commitHash = execSync(`git rev-parse --short HEAD`)
-        .toString()
-        .trim(); */
-      // gitInfo = `${branchName}-${commitHash}`;
-    }
-
     // create parent directory
 
     Object.keys(bundles).forEach(bundleKey => {
@@ -181,10 +164,6 @@ export class BundleService implements IBundlerService {
 
       let contents = `# Generated ${time}\n# ${bundleKey}\n`;
 
-      if (gitInfo) {
-        contents += `# git - ${gitInfo}`;
-      }
-
       bundle.sources.forEach(file => {
         contents += '# **********************************************\n';
         contents += `# Scripts from file ${file} \n`;
@@ -193,8 +172,21 @@ export class BundleService implements IBundlerService {
         contents += '\n\n';
       });
 
+      bundle.assets.forEach(asset => {
+        this.copyAssets(asset, dir);
+      });
+
       writeFileSync(filename, contents);
     });
+  }
+
+  private copyAssets(source, dest) {
+    logger.info('copying assets', {
+      source,
+      dest,
+    });
+
+    execSync(`cp ${source} ${dest}`);
   }
 
   private createBundle(name: string, source: IBundleSource): IBundle {
