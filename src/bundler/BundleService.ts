@@ -148,12 +148,7 @@ export class BundleService implements IBundlerService {
 
       mkdirp.sync(dir);
 
-      const filename = path.resolve(
-        __dirname,
-        '../..',
-        dir as string,
-        `${bundleOutputFile}.${scriptSuffix}`
-      );
+      const filename = `${dir}/${bundleOutputFile}.${scriptSuffix}`;
 
       logger.info('writing bundle to disk', {
         bundleKey,
