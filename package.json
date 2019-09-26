@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Tool suite for developing in URScript",
   "main": "dist/index.js",
+  "bin": {
+    "urscript-bundler": "dist/cli.js"
+  },
   "scripts": {
     "dist": "npx tsc",
     "start": "npx tsc && node dist/index.js",
@@ -41,6 +44,7 @@
     "chalk": "^2.4.2",
     "glob": "^7.1.4",
     "lodash": "^4.17.15",
+    "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.24.0",
     "semantic-release": "^15.13.24",
