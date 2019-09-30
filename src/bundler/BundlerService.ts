@@ -3,7 +3,6 @@ import { readFileSync, writeFileSync } from 'fs';
 import { cloneDeep } from 'lodash';
 import * as mkdirp from 'mkdirp';
 import moment from 'moment';
-import * as path from 'path';
 
 import { getFilePaths, mergeBundleSource } from '../util/BundleUtils';
 import { logger } from '../util/logger';
@@ -21,7 +20,7 @@ interface IBundlePermutations {
   };
 }
 
-export class BundleService implements IBundlerService {
+export class BundlerService implements IBundlerService {
   private config: IBundlerConfigInternal = {
     sources: {
       dimensions: {},
@@ -37,7 +36,8 @@ export class BundleService implements IBundlerService {
     },
   };
 
-  constructor(config: IBundlerConfig) {
+  constructor(config?: IBundlerConfig) {
+    // perform deep merge instead of spread
     this.config = {
       ...this.config,
       ...config,
@@ -154,6 +154,8 @@ export class BundleService implements IBundlerService {
         bundleKey,
         filename,
       });
+
+      bundle.file = filename;
 
       const time: string = moment().format('dddd, MMMM Do YYYY, h:mm:ss a');
 

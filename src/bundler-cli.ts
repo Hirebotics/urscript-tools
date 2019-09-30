@@ -3,7 +3,7 @@
 import { readFileSync } from 'fs';
 import minimist from 'minimist';
 
-import { BundleService } from './bundler/BundleService';
+import { BundlerService } from './bundler/BundlerService';
 import { IBundlerService } from './bundler/types';
 
 const printHelp = () => {
@@ -26,7 +26,7 @@ const main = async () => {
   const contents: string = readFileSync(configFilename).toString();
 
   try {
-    const service: IBundlerService = new BundleService(JSON.parse(contents));
+    const service: IBundlerService = new BundlerService(JSON.parse(contents));
 
     // TODO based on dimension filters execute single bundle or entire bundle
     service.bundleAll();

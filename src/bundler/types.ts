@@ -1,5 +1,5 @@
 export interface IBundlerConfig {
-  sources: {
+  sources?: {
     global?: IBundleSource;
     dimensions?: IBundleDimensions;
   };
@@ -20,6 +20,7 @@ export interface IBundlerService {
 
 export interface IBundle {
   name: string;
+  file?: string;
   sources: Array<string>;
   assets: Array<string>;
 }

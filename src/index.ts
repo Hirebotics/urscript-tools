@@ -1,2 +1,2 @@
-export * from './bundler/BundleService';
+export * from './bundler/BundlerService';
 export * from './bundler/types';
