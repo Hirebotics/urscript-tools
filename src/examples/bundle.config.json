@@ -1,0 +1,40 @@
+{
+  "sources": {
+    "global": {
+      "assets": {
+        "include": ["*.json"],
+        "exclude": []
+      },
+      "scripts": {
+        "include": ["src/*.ts"],
+        "exclude": []
+      }
+    },
+    "dimensions": {
+      "dimension1": {
+        "d1-variation1": {
+          "include": [],
+          "exclude": []
+        }
+      },
+      "dimension2": {
+        "d2-variation1": {
+          "include": [],
+          "exclude": []
+        },
+        "d2-variation2": {
+          "include": [],
+          "exclude": []
+        }
+      }
+    }
+  },
+  "options": {
+    "bundleKey": "default",
+    "bundleOutputFile": "default",
+    "outputDir": "bundle-dist",
+    "appendGitCommitHash": false,
+    "writeToDisk": true,
+    "scriptSuffix": "script"
+  }
+}

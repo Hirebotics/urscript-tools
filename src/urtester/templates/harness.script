@@ -1,0 +1,8 @@
+confirm user safety parameters
+power on
+set robotmode run
+
+def test_harness():
+  {{ test_framework_code }}
+  {{ test_script_code }}
+end
