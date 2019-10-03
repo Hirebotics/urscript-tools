@@ -1,0 +1,31 @@
+{
+  "controller": {
+    "host": "localhost",
+    "ports": {
+      "realtime": 23800
+    },
+    "autoLaunch": {
+      "disabled": false,
+      "version": "5.3.1"
+    }
+  },
+  "testServer": {
+    "host": "host.docker.internal",
+    "port": 24493,
+    "defaultExecutionTimeout": 10000
+  },
+  "mocks": {
+    "global": "__mocks__/**/*.mock.script"
+  },
+  "sources": {
+    "global": {
+      "scripts": {
+        "include": ["src/**/*.script"],
+        "exclude": [
+          "src/**/templates/**/*.script",
+          "src/**/__tests__/**/*.script"
+        ]
+      }
+    }
+  }
+}

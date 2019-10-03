@@ -1,13 +1,14 @@
 {
   "name": "@hirebotics/urscript-tools",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Tool suite for developing in URScript",
   "main": "dist/index.js",
   "bin": {
-    "urscript-bundler": "dist/bundler-cli.js"
+    "urscript-bundler": "dist/cli/bundler-cli.js",
+    "urscript-tester": "dist/cli/tester-cli.js"
   },
   "scripts": {
-    "dist": "npx tsc",
+    "dist": "npx tsc && copyfiles -u 1 src/urtester/templates/*.script dist",
     "start": "npx tsc && node dist/index.js",
     "test": "npx jest",
     "test-coverage": "npx jest --coverage",
@@ -33,6 +34,7 @@
   "homepage": "https://github.com/Hirebotics/urscript-tools#readme",
   "devDependencies": {
     "@types/jest": "^24.0.18",
+    "copyfiles": "^2.1.1",
     "jest": "^24.9.0",
     "prettier": "^1.18.2",
     "ts-jest": "^24.1.0",

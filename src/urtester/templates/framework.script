@@ -1,0 +1,97 @@
+global TEST_RUNNING_NAME = ""
+global TEST_RUNNING_INDEX = 0
+global TEST_FAILED_TOTAL = 0
+global TEST_SOCKET_NAME = "test_framework_socket"
+global TEST_LAST_RESULT = "passed"
+global TEST_LAST_RESULT_MESSAGE = ""
+
+def test_framework_initialize(host, port):
+  socket_open(host, port, TEST_SOCKET_NAME)
+
+  local type = test_framework_internal_createKeyValuePair("type", "EXECUTION_STARTED", False)
+  test_framework_internal_notifyServer(type)
+end
+
+def test_framework_internal_beforeEach(testName):
+  TEST_RUNNING_INDEX = TEST_RUNNING_INDEX + 1
+  TEST_RUNNING_NAME = testName
+  TEST_LAST_RESULT = "passed"
+  TEST_LAST_RESULT_MESSAGE = ""
+end
+
+def test_framework_internal_afterEach(testName):
+  test_framework_internal_sendResult(testName)
+end
+
+def test_framework_internal_sendResult(testName):
+  local name = test_framework_internal_createKeyValuePair("name", testName)
+  local pass = test_framework_internal_createKeyValuePair("status", TEST_LAST_RESULT)
+  local message = test_framework_internal_createKeyValuePair("message", TEST_LAST_RESULT_MESSAGE)
+  local type = test_framework_internal_createKeyValuePair("type", "EXECUTION_RESULT", False)
+
+  local result = str_cat(name, pass)
+  result = str_cat(result, message)
+  result = str_cat(result, type)
+
+  test_framework_internal_notifyServer(result)
+end
+
+def test_framework_internal_log_message(message):
+  local message = test_framework_internal_createKeyValuePair("message", message)
+  local type = test_framework_internal_createKeyValuePair("type", "LOG_MESSAGE", False)
+
+  test_framework_internal_notifyServer(
+    str_cat(message, type)
+  )
+end
+
+def test_framework_internal_afterAll():
+  local type = test_framework_internal_createKeyValuePair("type", "EXECUTION_COMPLETE", False)
+  test_framework_internal_notifyServer(type)
+end
+
+def test_framework_internal_notifyServer(message):
+  local packet = str_cat(message, "$^")
+  socket_send_line(packet, TEST_SOCKET_NAME)
+end
+
+def test_framework_internal_testFailed(testName, index, assertFailedMessage = ""):
+  TEST_FAILED_TOTAL = TEST_FAILED_TOTAL + 1
+  TEST_LAST_RESULT = "failed"
+  TEST_LAST_RESULT_MESSAGE = assertFailedMessage
+end
+
+def test_framework_internal_getAssertFailedMessage(name, result, expected):
+  local msg = str_cat("assertName=", name)
+  msg = str_cat(msg, ";expected=")
+  msg = str_cat(msg, expected)
+  msg = str_cat(msg, ";received=")
+  msg = str_cat(msg, result)
+  return msg
+end
+
+def test_framework_internal_createKeyValuePair(key, value, appendDelimiter = True):
+  local pair = str_cat(key, "&&&")
+  pair = str_cat(pair, value)
+
+  if(appendDelimiter):
+    pair = str_cat(pair, "+++")
+  end
+  return pair
+end
+
+def assertEqual(name, result, expected): 
+  if(not expected == result):
+    local assertFailedMessage = test_framework_internal_getAssertFailedMessage(name, result, expected)
+    test_framework_internal_testFailed(TEST_RUNNING_NAME, TEST_RUNNING_INDEX, assertFailedMessage)
+  end
+end
+
+def setTestExecutionTimeout(timeout): 
+  local executionTimeout = test_framework_internal_createKeyValuePair("timeout", timeout)
+  local type = test_framework_internal_createKeyValuePair("type", "TEST_EXECUTION_TIMEOUT", False)
+
+  test_framework_internal_notifyServer(
+    str_cat(executionTimeout, type)
+  )
+end

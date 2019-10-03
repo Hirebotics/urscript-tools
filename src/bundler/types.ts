@@ -1,8 +1,5 @@
 export interface IBundlerConfig {
-  sources?: {
-    global?: IBundleSource;
-    dimensions?: IBundleDimensions;
-  };
+  sources?: IBundleSources;
   options?: {
     bundleKey?: string;
     bundleOutputFile?: string;
@@ -16,6 +13,11 @@ export interface IBundlerConfig {
 export interface IBundlerService {
   bundle(filters: Array<IBundleDimensionFilter>): Promise<IBundles | null>;
   bundleAll(): Promise<IBundles>;
+}
+
+export interface IBundleSources {
+  global?: IBundleSource;
+  dimensions?: IBundleDimensions;
 }
 
 export interface IBundle {

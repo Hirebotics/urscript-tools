@@ -1,1 +1,9 @@
 # Placeholder file for unit test
+
+def test_helloWorld(): 
+  assertEqual(
+    name = "Hello World",
+    result = 1,
+    expected = 1
+  )
+end

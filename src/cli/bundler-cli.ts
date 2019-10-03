@@ -3,14 +3,14 @@
 import { readFileSync } from 'fs';
 import minimist from 'minimist';
 
-import { BundlerService } from './bundler/BundlerService';
-import { IBundlerService } from './bundler/types';
+import { BundlerService } from '../bundler/BundlerService';
+import { IBundlerService } from '../bundler/types';
 
 const printHelp = () => {
-  console.log('Usage: npx urscript-bundler --config <config.json>');
+  console.log('Usage: npx urscript-bundler [--config <config.json>]');
   console.log('Tool used to generate unique script bundles');
   console.log('Options:');
-  console.log('--config  List all available welders and torches');
+  console.log('--config  Bundle configuration');
 };
 
 const main = async () => {
