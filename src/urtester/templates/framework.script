@@ -12,6 +12,10 @@ def test_framework_initialize(host, port):
   test_framework_internal_notifyServer(type)
 end
 
+def test_framework_shutdown():
+  socket_close(TEST_SOCKET_NAME)
+end
+
 def test_framework_internal_beforeEach(testName):
   TEST_RUNNING_INDEX = TEST_RUNNING_INDEX + 1
   TEST_RUNNING_NAME = testName
@@ -48,6 +52,8 @@ end
 def test_framework_internal_afterAll():
   local type = test_framework_internal_createKeyValuePair("type", "EXECUTION_COMPLETE", False)
   test_framework_internal_notifyServer(type)
+  
+  test_framework_shutdown()
 end
 
 def test_framework_internal_notifyServer(message):
