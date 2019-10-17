@@ -1,1 +1,3 @@
 # urscripts-tools
+
+![Build Status](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiSlZ5bzhIMHdzQzJLK0I0SXF5ZG8xYmRNbW5YT1RtQ3gyZmxDaXlRdXdpb21NaTJzOGoxN2pJaFkrNkJCS1R1U0d3MFVBVHptZjJDa3ppT1BBUzVodHlFPSIsIml2UGFyYW1ldGVyU3BlYyI6IncrYjM5dFNHWDJNMHYzSlEiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
