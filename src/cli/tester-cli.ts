@@ -41,7 +41,7 @@ const defaultConfig: IURTesterCliConfig = {
     defaultExecutionTimeout: 10000,
   },
   mocks: {
-    global: '**/__mocks__/**/*.mock.script',
+    global: '__mocks__/**/*.mock.script',
   },
   sources: {
     global: {
