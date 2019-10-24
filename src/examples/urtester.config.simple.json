@@ -1,0 +1,18 @@
+{
+  "controller": {
+    "autoLaunch": {
+      "version": "5.3.1"
+    }
+  },
+  "sources": {
+    "global": {
+      "scripts": {
+        "include": ["src/**/*.script"],
+        "exclude": [
+          "src/**/templates/**/*.script",
+          "src/**/__tests__/**/*.script"
+        ]
+      }
+    }
+  }
+}

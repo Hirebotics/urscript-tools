@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import { BundlerService } from '../bundler/BundlerService';
 import { IBundle, IBundles } from '../bundler/types';
 import { getFilesFromPatterns } from '../util/BundleUtils';
+import { getDockerHost } from '../util/docker';
 import { logger } from '../util/logger';
 import { ITestExecutionConfig, ITestExecutionService, ITestFile, ITestResult } from './types';
 
@@ -189,10 +190,16 @@ export class TestExecutionService implements ITestExecutionService {
     code: string,
     testCode: string
   ): Promise<string> {
-    // TODO remove as any and fix types
     const {
-      server: { host, port },
-    } = this.config.environment as any;
+      server: { port },
+    } = this.config.environment;
+
+    const host: string = this.getHost();
+
+    logger.info('injecting environment config into script', {
+      host,
+      port,
+    });
 
     let mergedCode = code;
 
@@ -301,6 +308,20 @@ export class TestExecutionService implements ITestExecutionService {
 
   private getTemplatesDir(): string {
     return resolve(__dirname, 'templates');
+  }
+
+  private getHost(): string {
+    const {
+      environment: {
+        server: { host },
+      },
+    } = this.config;
+
+    if (host === 'autodiscover') {
+      return getDockerHost();
+    } else {
+      return host;
+    }
   }
 
   /**

@@ -2,15 +2,16 @@
   "controller": {
     "host": "localhost",
     "ports": {
-      "realtime": 23800
+      "primary": 30001
     },
     "autoLaunch": {
       "disabled": false,
-      "version": "5.3.1"
+      "version": "5.3.1",
+      "stop": false
     }
   },
   "testServer": {
-    "host": "host.docker.internal",
+    "host": "autodiscover",
     "port": 24493,
     "defaultExecutionTimeout": 10000
   },

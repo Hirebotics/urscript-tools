@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 import { readFileSync } from 'fs';
+import { merge } from 'lodash';
 import minimist from 'minimist';
 import { extname } from 'path';
 
@@ -15,13 +16,41 @@ import { logger } from '../util/logger';
 import { IURTesterCliConfig } from './types';
 
 const printHelp = () => {
-  console.log(
-    'Usage: npx urscript-tester [--bundle <config.json>] [--controller-host host] [--controller-port port] [--controller-version version] [--test-host] [--test-port] [path]'
-  );
+  console.log('Usage: npx urscript-tester [--bundle <config.json>] [path]');
   console.log('Tool used to generate unique script bundles');
   console.log('Options:');
   console.log('--config Configuration file');
   console.log('Expression (glob format) used to determine tests to execute');
+};
+
+const defaultConfig: IURTesterCliConfig = {
+  controller: {
+    host: 'localhost',
+    ports: {
+      primary: 30001,
+    },
+    autoLaunch: {
+      disabled: false,
+      version: '5.3.1',
+      stop: false,
+    },
+  },
+  testServer: {
+    host: 'autodiscover',
+    port: 24493,
+    defaultExecutionTimeout: 10000,
+  },
+  mocks: {
+    global: '__mocks__/**/*.mock.script',
+  },
+  sources: {
+    global: {
+      scripts: {
+        include: [],
+        exclude: [],
+      },
+    },
+  },
 };
 
 const getTestPattern = pattern => {
@@ -56,7 +85,10 @@ const main = async () => {
   const contents: string = readFileSync(configFilename).toString();
 
   try {
-    const config: IURTesterCliConfig = JSON.parse(contents);
+    const userConfig: IURTesterCliConfig = JSON.parse(contents);
+    const config: IURTesterCliConfig = { ...defaultConfig };
+
+    merge(config, userConfig);
 
     logger.debug('urtest-cli launched with config', {
       config,
@@ -75,17 +107,18 @@ const main = async () => {
 
     const scriptRunnerConfig: IScriptRunnerConfig = {
       host: config.controller.host,
-      port: config.controller.ports.realtime,
+      port: config.controller.ports.primary,
       controller: {
         autoLaunch: !config.controller.autoLaunch.disabled,
         controllerVersion: config.controller.autoLaunch.version,
+        autoStop: config.controller.autoLaunch.stop,
       },
     };
 
     const testRunnerConfig: ITestRunnerConfig = {
       runner: new URScriptRunner(scriptRunnerConfig),
       port: config.testServer.port,
-      executionTimeout: config.testServer.defaultExecutionTimeout || 10000,
+      executionTimeout: config.testServer.defaultExecutionTimeout,
     };
 
     const executionConfig: ITestExecutionConfig = {
@@ -100,7 +133,7 @@ const main = async () => {
         pattern: getTestPattern(path[0]),
       },
       mocks: {
-        global: config.mocks.global || '__mocks__/**/*.mock.script',
+        global: config.mocks.global,
       },
       bundlerConfig,
       results: {
