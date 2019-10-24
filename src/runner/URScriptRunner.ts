@@ -2,8 +2,9 @@ import chalk from 'chalk';
 import childProcess, { ChildProcessWithoutNullStreams } from 'child_process';
 import { createConnection } from 'net';
 
+import { getDockerContainerId } from '../util/docker';
 import { logger } from '../util/logger';
-import { IScriptRunner, IScriptRunnerConfig, IScriptRunnerShutdownOptions } from './types';
+import { IScriptRunner, IScriptRunnerConfig } from './types';
 
 export class URScriptRunner implements IScriptRunner {
   private config: IScriptRunnerConfig;
@@ -35,19 +36,15 @@ export class URScriptRunner implements IScriptRunner {
     await this.sendToController(script);
   }
 
-  public async shutdown(options: IScriptRunnerShutdownOptions): Promise<void> {
-    const { stopAutoLaunchedController } = options || {
-      stopAutoLaunchedController: false,
-    };
-
+  public async shutdown(): Promise<void> {
     if (this.logTail) {
       logger.info('shutting down urcontroller log monitor');
       this.logTail.kill();
       this.logTail = undefined;
     }
 
-    if (stopAutoLaunchedController) {
-      // TODO
+    if (this.config.controller.autoStop) {
+      await this.stop();
     }
   }
 
@@ -125,6 +122,28 @@ export class URScriptRunner implements IScriptRunner {
     return false;
   }
 
+  private async stop(): Promise<boolean> {
+    const command: string | undefined = await this.getStopCommand();
+
+    logger.debug('stopping auto launched controller', {
+      command,
+    });
+
+    if (command) {
+      try {
+        await childProcess.execSync(command);
+        return true;
+      } catch (err) {
+        logger.error('error stopping controller', {
+          config: this.config,
+          errorMessage: err.message,
+        });
+      }
+    }
+
+    return false;
+  }
+
   private async isRunning(): Promise<boolean> {
     const containerId = await this.getContainerId();
 
@@ -137,22 +156,7 @@ export class URScriptRunner implements IScriptRunner {
 
   private async getContainerId(): Promise<string | undefined> {
     const image = await this.getDockerImageName();
-    const command = `docker ps | grep ${image} | awk '{ print $1 }'`;
-
-    logger.debug('checking for existing container id', {
-      command,
-    });
-
-    const buffer = childProcess.execSync(command).toString();
-
-    const result = buffer.toString();
-
-    if (result) {
-      logger.debug('found container id', {
-        id: result,
-      });
-      return result.trim();
-    }
+    return getDockerContainerId(image);
   }
 
   private async getDockerImageName(): Promise<string> {
@@ -164,5 +168,14 @@ export class URScriptRunner implements IScriptRunner {
     const { port } = this.config;
 
     return `docker run -d --privileged -p ${port}:30001 ${image}`;
+  }
+
+  private async getStopCommand(): Promise<string | undefined> {
+    const image: string = await this.getDockerImageName();
+    const containerId: string | undefined = await this.getContainerId();
+
+    if (containerId) {
+      return `docker stop ${containerId}`;
+    }
   }
 }

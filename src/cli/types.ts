@@ -9,6 +9,7 @@ export interface IURTesterCliConfig {
     autoLaunch: {
       disabled: boolean;
       version: string;
+      stop: boolean;
     };
   };
   testServer: {

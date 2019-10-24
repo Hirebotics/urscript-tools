@@ -15,9 +15,7 @@ import { logger } from '../util/logger';
 import { IURTesterCliConfig } from './types';
 
 const printHelp = () => {
-  console.log(
-    'Usage: npx urscript-tester [--bundle <config.json>] [--controller-host host] [--controller-port port] [--controller-version version] [--test-host] [--test-port] [path]'
-  );
+  console.log('Usage: npx urscript-tester [--bundle <config.json>] [path]');
   console.log('Tool used to generate unique script bundles');
   console.log('Options:');
   console.log('--config Configuration file');
@@ -79,6 +77,7 @@ const main = async () => {
       controller: {
         autoLaunch: !config.controller.autoLaunch.disabled,
         controllerVersion: config.controller.autoLaunch.version,
+        autoStop: config.controller.autoLaunch.stop,
       },
     };
 
