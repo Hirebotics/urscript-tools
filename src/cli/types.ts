@@ -4,7 +4,7 @@ export interface IURTesterCliConfig {
   controller: {
     host: string;
     ports: {
-      realtime: number;
+      primary: number;
     };
     autoLaunch: {
       disabled: boolean;

@@ -2,7 +2,7 @@
   "controller": {
     "host": "localhost",
     "ports": {
-      "realtime": 23800
+      "primary": 30001
     },
     "autoLaunch": {
       "disabled": false,

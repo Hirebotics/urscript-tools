@@ -27,7 +27,7 @@ const defaultConfig: IURTesterCliConfig = {
   controller: {
     host: 'localhost',
     ports: {
-      realtime: 23800,
+      primary: 30001,
     },
     autoLaunch: {
       disabled: false,
@@ -107,7 +107,7 @@ const main = async () => {
 
     const scriptRunnerConfig: IScriptRunnerConfig = {
       host: config.controller.host,
-      port: config.controller.ports.realtime,
+      port: config.controller.ports.primary,
       controller: {
         autoLaunch: !config.controller.autoLaunch.disabled,
         controllerVersion: config.controller.autoLaunch.version,

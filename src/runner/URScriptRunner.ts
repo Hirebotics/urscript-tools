@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import childProcess, { ChildProcessWithoutNullStreams } from 'child_process';
+import getPort from 'get-port';
 import { createConnection } from 'net';
 
 import { getDockerContainerId } from '../util/docker';
@@ -174,7 +175,23 @@ export class URScriptRunner implements IScriptRunner {
     const image: string = await this.getDockerImageName();
     const { port } = this.config;
 
-    return `docker run -d --privileged -p ${port}:30001 ${image}`;
+    const primaryPort: number = await getPort({
+      port,
+    });
+
+    const secondaryPort: number = await getPort({
+      port: 30002,
+    });
+
+    const realtimePort: number = await getPort({
+      port: 30003,
+    });
+
+    const rtdePort: number = await getPort({
+      port: 30004,
+    });
+
+    return `docker run -d --privileged -p ${primaryPort}:30001 -p ${secondaryPort}:30002 -p ${realtimePort}:30003 -p ${rtdePort}:30004 ${image}`;
   }
 
   private async getStopCommand(): Promise<string | undefined> {
