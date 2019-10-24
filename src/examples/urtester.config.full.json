@@ -11,7 +11,7 @@
     }
   },
   "testServer": {
-    "host": "host.docker.internal",
+    "host": "autodiscover",
     "port": 24493,
     "defaultExecutionTimeout": 10000
   },
