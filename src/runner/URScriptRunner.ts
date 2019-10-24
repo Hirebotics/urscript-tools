@@ -111,7 +111,14 @@ export class URScriptRunner implements IScriptRunner {
 
     try {
       await childProcess.execSync(command);
-      return true;
+
+      // delay for a few seconds after launching to give time for the
+      // controller to launch
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(true);
+        }, 1000);
+      });
     } catch (err) {
       logger.error('error launching controller', {
         config: this.config,
