@@ -38,6 +38,11 @@ export class TestRunner implements ITestRunner {
   }
 
   public async run(test: ITestFile): Promise<ITestResult[]> {
+    const { runner } = this.config;
+
+    // make sure runner is launched before starting result server
+    await runner.launch();
+
     if (!this.isResultServerRunning()) {
       await this.startResultServer();
     }
@@ -45,8 +50,6 @@ export class TestRunner implements ITestRunner {
     logger.info('running test', {
       file: test.file,
     });
-
-    const { runner } = this.config;
 
     // send test file to the script runner
     await runner.send(test.code);
