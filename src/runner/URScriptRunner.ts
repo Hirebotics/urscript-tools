@@ -16,18 +16,10 @@ export class URScriptRunner implements IScriptRunner {
   }
 
   public async send(script: string): Promise<void> {
-    const {
-      controller: { autoLaunch },
-    } = this.config;
+    const launched: boolean = await this.launch();
 
-    const running = await this.isRunning();
-
-    if (!running && autoLaunch) {
-      const launched: boolean = await this.launch();
-
-      if (!launched) {
-        throw new Error('failed to auto launch controller');
-      }
+    if (!launched) {
+      throw new Error('failed to auto launch controller');
     }
 
     if (!this.logTail) {
@@ -35,6 +27,43 @@ export class URScriptRunner implements IScriptRunner {
     }
 
     await this.sendToController(script);
+  }
+
+  public async launch(): Promise<boolean> {
+    const {
+      controller: { autoLaunch },
+    } = this.config;
+
+    const running = await this.isRunning();
+
+    if (!running && autoLaunch) {
+      const command: string = await this.getLaunchCommand();
+
+      logger.debug('auto launching controller', {
+        command,
+      });
+
+      try {
+        await childProcess.execSync(command);
+
+        // delay for a few seconds after launching to give time for the
+        // controller to launch
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve(true);
+          }, 1000);
+        });
+      } catch (err) {
+        logger.error('error launching controller', {
+          config: this.config,
+          errorMessage: err.message,
+        });
+      }
+
+      return false;
+    } else {
+      return true;
+    }
   }
 
   public async shutdown(): Promise<void> {
@@ -101,33 +130,6 @@ export class URScriptRunner implements IScriptRunner {
         .split('\n')
         .forEach(line => console.log(`${prefix}: ${chalk.red(line)}`));
     });
-  }
-
-  private async launch(): Promise<boolean> {
-    const command: string = await this.getLaunchCommand();
-
-    logger.debug('auto launching controller', {
-      command,
-    });
-
-    try {
-      await childProcess.execSync(command);
-
-      // delay for a few seconds after launching to give time for the
-      // controller to launch
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve(true);
-        }, 1000);
-      });
-    } catch (err) {
-      logger.error('error launching controller', {
-        config: this.config,
-        errorMessage: err.message,
-      });
-    }
-
-    return false;
   }
 
   private async stop(): Promise<boolean> {
