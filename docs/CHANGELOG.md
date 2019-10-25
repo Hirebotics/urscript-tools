@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/Hirebotics/urscript-tools/compare/v1.2.1...v1.2.2) (2019-10-25)
+
+
+### Bug Fixes
+
+* **runner:** Exposed launch method to give more control to others on when the controller is launched. Fixes an issue where the test fail due to launch takes longer than execution timeout. ([8785c63](https://github.com/Hirebotics/urscript-tools/commit/8785c63))
+
 ## [1.2.1](https://github.com/Hirebotics/urscript-tools/compare/v1.2.0...v1.2.1) (2019-10-25)
 
 
