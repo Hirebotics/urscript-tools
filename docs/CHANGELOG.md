@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Hirebotics/urscript-tools/compare/v1.2.0...v1.2.1) (2019-10-25)
+
+
+### Bug Fixes
+
+* **urtester:** Changed to run a container to lookup ip address ([5d95f69](https://github.com/Hirebotics/urscript-tools/commit/5d95f69))
+
 # [1.2.0](https://github.com/Hirebotics/urscript-tools/compare/v1.1.0...v1.2.0) (2019-10-24)
 
 
