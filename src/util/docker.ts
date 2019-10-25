@@ -1,14 +1,19 @@
-import childProcess from 'child_process';
+import { execSync } from 'child_process';
 
 import { logger } from './logger';
 import { isLinux } from './os';
 
-export const getDockerHost = (): string => {
-  // TODO improve this logic, but as of now Linux
-  // is the only platform that doesn't provide
-  // host.docker.internal
+export const getDockerHost = async (): Promise<string> => {
   if (isLinux()) {
-    return '172.17.0.1';
+    logger.info('looking up docker ip for linux');
+
+    const result: string = execSync(
+      "docker run alpine:latest /sbin/ifconfig eth0 | grep 'inet addr' | cut -d: -f2 | awk '{print $1}'"
+    )
+      .toString()
+      .trim();
+
+    return result.substring(0, result.lastIndexOf('.') + 1) + '1';
   } else {
     return 'host.docker.internal';
   }
@@ -21,7 +26,7 @@ export const getDockerContainerId = (imageName: string): string | undefined => {
     command,
   });
 
-  const buffer = childProcess.execSync(command).toString();
+  const buffer = execSync(command).toString();
 
   const result = buffer.toString();
 

@@ -194,7 +194,7 @@ export class TestExecutionService implements ITestExecutionService {
       server: { port },
     } = this.config.environment;
 
-    const host: string = this.getHost();
+    const host: string = await this.getHost();
 
     logger.info('injecting environment config into script', {
       host,
@@ -310,7 +310,7 @@ export class TestExecutionService implements ITestExecutionService {
     return resolve(__dirname, 'templates');
   }
 
-  private getHost(): string {
+  private async getHost(): Promise<string> {
     const {
       environment: {
         server: { host },

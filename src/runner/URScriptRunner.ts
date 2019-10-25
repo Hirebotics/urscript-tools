@@ -195,7 +195,6 @@ export class URScriptRunner implements IScriptRunner {
   }
 
   private async getStopCommand(): Promise<string | undefined> {
-    const image: string = await this.getDockerImageName();
     const containerId: string | undefined = await this.getContainerId();
 
     if (containerId) {
