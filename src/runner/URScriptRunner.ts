@@ -10,6 +10,7 @@ import { IScriptRunner, IScriptRunnerConfig } from './types';
 export class URScriptRunner implements IScriptRunner {
   private config: IScriptRunnerConfig;
   private logTail: ChildProcessWithoutNullStreams | undefined;
+  private primaryPort: number | undefined;
 
   constructor(config: IScriptRunnerConfig) {
     this.config = config;
@@ -39,7 +40,7 @@ export class URScriptRunner implements IScriptRunner {
     if (!running && autoLaunch) {
       const command: string = await this.getLaunchCommand();
 
-      logger.debug('auto launching controller', {
+      logger.info('auto launching controller', {
         command,
       });
 
@@ -79,12 +80,16 @@ export class URScriptRunner implements IScriptRunner {
   }
 
   private async sendToController(script: string) {
-    const { host, port } = this.config;
+    const { host } = this.config;
+
+    if (!this.primaryPort) {
+      this.primaryPort = await this.getRealtimePort();
+    }
 
     return new Promise((resolve, reject) => {
       const socket = createConnection({
         host,
-        port,
+        port: this.primaryPort as number,
       });
 
       const commands = script.split('\n');
@@ -154,6 +159,36 @@ export class URScriptRunner implements IScriptRunner {
     return false;
   }
 
+  private async getRealtimePort(): Promise<number> {
+    const containerId: string | undefined = await this.getContainerId();
+
+    if (containerId) {
+      const command:
+        | string
+        | undefined = `docker inspect --format="{{json .NetworkSettings.Ports }}" ${containerId}`;
+
+      logger.debug('get realtime port', {
+        command,
+      });
+
+      if (command) {
+        try {
+          const result = JSON.parse(
+            await childProcess.execSync(command).toString()
+          );
+          return result['30001/tcp'][0].HostPort;
+        } catch (err) {
+          logger.error('error stopping controller', {
+            config: this.config,
+            errorMessage: err.message,
+          });
+        }
+      }
+    }
+
+    return this.config.port;
+  }
+
   private async isRunning(): Promise<boolean> {
     const containerId = await this.getContainerId();
 
@@ -177,20 +212,31 @@ export class URScriptRunner implements IScriptRunner {
     const image: string = await this.getDockerImageName();
     const { port } = this.config;
 
-    const primaryPort: number = await getPort({
+    const primaryPort = await getPort({
       port,
+      host: '0.0.0.0',
     });
 
     const secondaryPort: number = await getPort({
       port: 30002,
+      host: '0.0.0.0',
     });
 
     const realtimePort: number = await getPort({
       port: 30003,
+      host: '0.0.0.0',
     });
 
     const rtdePort: number = await getPort({
       port: 30004,
+      host: '0.0.0.0',
+    });
+
+    logger.info('binding to ports', {
+      primaryPort,
+      secondaryPort,
+      realtimePort,
+      rtdePort,
     });
 
     return `docker run -d --privileged -p ${primaryPort}:30001 -p ${secondaryPort}:30002 -p ${realtimePort}:30003 -p ${rtdePort}:30004 ${image}`;
