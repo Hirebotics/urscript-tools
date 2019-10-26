@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/Hirebotics/urscript-tools/compare/v1.2.2...v1.2.3) (2019-10-26)
+
+
+### Bug Fixes
+
+* **runner:** Fixed issue where dynamic ports weren't being created. Updated to query container port when running. ([58cca0f](https://github.com/Hirebotics/urscript-tools/commit/58cca0f))
+
 ## [1.2.2](https://github.com/Hirebotics/urscript-tools/compare/v1.2.1...v1.2.2) (2019-10-25)
 
 
