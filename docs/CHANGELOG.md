@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/Hirebotics/urscript-tools/compare/v1.2.4...v1.2.5) (2019-11-02)
+
+
+### Bug Fixes
+
+* **urtester:** Improved test result formatting to use column auto widths and a cleaner result border ([48a7f02](https://github.com/Hirebotics/urscript-tools/commit/48a7f02))
+
 ## [1.2.4](https://github.com/Hirebotics/urscript-tools/compare/v1.2.3...v1.2.4) (2019-11-02)
 
 
