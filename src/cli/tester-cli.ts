@@ -41,7 +41,8 @@ const defaultConfig: IURTesterCliConfig = {
     defaultExecutionTimeout: 10000,
   },
   mocks: {
-    global: '__mocks__/**/*.mock.script',
+    include: ['__mocks__/**/*.mock.script'],
+    exclude: [],
   },
   sources: {
     global: {
@@ -132,9 +133,7 @@ const main = async () => {
       test: {
         pattern: getTestPattern(path[0]),
       },
-      mocks: {
-        global: config.mocks.global,
-      },
+      mocks: config.mocks,
       bundlerConfig,
       results: {
         writer: new TestResultWriter(),

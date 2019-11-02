@@ -3,8 +3,8 @@ import { flatten } from 'lodash';
 import { resolve } from 'path';
 
 import { BundlerService } from '../bundler/BundlerService';
-import { IBundle, IBundles } from '../bundler/types';
-import { getFilesFromPatterns } from '../util/BundleUtils';
+import { FilePattern, IBundle, IBundles } from '../bundler/types';
+import { getFilePaths, getFilesFromPatterns } from '../util/BundleUtils';
 import { getDockerHost } from '../util/docker';
 import { logger } from '../util/logger';
 import { ITestExecutionConfig, ITestExecutionService, ITestFile, ITestResult } from './types';
@@ -104,10 +104,10 @@ export class TestExecutionService implements ITestExecutionService {
   }
 
   private async injectGlobalMockDefinitions(code: string): Promise<string> {
-    const pattern: string | undefined = this.config.mocks.global;
+    const pattern: FilePattern = this.config.mocks;
 
     if (pattern) {
-      const files = getFilesFromPatterns([pattern]);
+      const files = getFilePaths(pattern);
 
       let merged = code;
 

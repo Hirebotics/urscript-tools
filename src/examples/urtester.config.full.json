@@ -16,7 +16,7 @@
     "defaultExecutionTimeout": 10000
   },
   "mocks": {
-    "global": "__mocks__/**/*.mock.script"
+    "include": ["__mocks__/**/*.mock.script"]
   },
   "sources": {
     "global": {
