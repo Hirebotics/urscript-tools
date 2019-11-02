@@ -1,4 +1,4 @@
-import { IBundleSources } from '../bundler/types';
+import { FilePattern, IBundleSources } from '../bundler/types';
 
 export interface IURTesterCliConfig {
   controller: {
@@ -17,8 +17,6 @@ export interface IURTesterCliConfig {
     port: number;
     defaultExecutionTimeout: number;
   };
-  mocks: {
-    global: string;
-  };
+  mocks: FilePattern;
   sources: IBundleSources;
 }

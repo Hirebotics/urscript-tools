@@ -1,4 +1,4 @@
-import { IBundlerConfig } from '../bundler/types';
+import { FilePattern, IBundlerConfig } from '../bundler/types';
 import { IScriptRunner } from '../runner/types';
 
 export interface ITestExecutionConfig {
@@ -6,9 +6,7 @@ export interface ITestExecutionConfig {
   test: {
     pattern: string;
   };
-  mocks: {
-    global: string;
-  };
+  mocks: FilePattern;
   bundlerConfig: IBundlerConfig;
   environment: {
     server: {
