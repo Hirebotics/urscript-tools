@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/Hirebotics/urscript-tools/compare/v1.2.3...v1.2.4) (2019-11-02)
+
+
+### Bug Fixes
+
+* **urtester:** Added support for more FilePattern on mock definitions ([50bcc01](https://github.com/Hirebotics/urscript-tools/commit/50bcc01))
+
 ## [1.2.3](https://github.com/Hirebotics/urscript-tools/compare/v1.2.2...v1.2.3) (2019-10-26)
 
 
