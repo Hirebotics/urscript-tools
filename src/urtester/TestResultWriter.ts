@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { table } from 'table';
+import { getBorderCharacters, table } from 'table';
 
 import { ITestFile, ITestResult, ITestResultWriter } from './types';
 
@@ -39,17 +39,7 @@ export class TestResultWriter implements ITestResultWriter {
     );
 
     const config = {
-      columns: {
-        0: {
-          width: 50,
-        },
-        1: {
-          width: 10,
-        },
-        2: {
-          width: 60,
-        },
-      },
+      border: getBorderCharacters('norc'),
     };
 
     console.log(table(data, config));
