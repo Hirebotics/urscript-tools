@@ -123,18 +123,16 @@ const main = async () => {
 
     const globalSources = {};
 
-    function customizer(objValue, srcValue) {
-      if (isArray(objValue)) {
-        return objValue.concat(srcValue);
-      }
-    }
-
     // merge any sources from test config if provided
     mergeWith(
       globalSources,
       bundlerConfig.sources.global,
       config.sources.global,
-      customizer
+      (objValue, srcValue) => {
+        if (isArray(objValue)) {
+          return objValue.concat(srcValue);
+        }
+      }
     );
 
     bundlerConfig.sources.global = globalSources;
