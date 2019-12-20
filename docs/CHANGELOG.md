@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/Hirebotics/urscript-tools/compare/v1.2.5...v1.3.0) (2019-12-20)
+
+
+### Bug Fixes
+
+* changed mergeWith customizer to be anonymous ([b99b923](https://github.com/Hirebotics/urscript-tools/commit/b99b923))
+
+
+### Features
+
+* added support for test runner to leverage bundle config ([3fefe09](https://github.com/Hirebotics/urscript-tools/commit/3fefe09))
+
 ## [1.2.5](https://github.com/Hirebotics/urscript-tools/compare/v1.2.4...v1.2.5) (2019-11-02)
 
 
