@@ -22,6 +22,7 @@ export interface IBundleSources {
 
 export interface IBundle {
   name: string;
+  dir?: string;
   file?: string;
   sources: Array<string>;
   assets: Array<string>;

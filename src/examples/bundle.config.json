@@ -13,18 +13,28 @@
     "dimensions": {
       "dimension1": {
         "d1-variation1": {
-          "include": [],
-          "exclude": []
+          "assets": {
+            "include": [],
+            "exclude": []
+          },
+          "scripts": {
+            "include": [],
+            "exclude": []
+          }
         }
       },
       "dimension2": {
         "d2-variation1": {
-          "include": [],
-          "exclude": []
+          "scripts": {
+            "include": [],
+            "exclude": []
+          }
         },
         "d2-variation2": {
-          "include": [],
-          "exclude": []
+          "scripts": {
+            "include": [],
+            "exclude": []
+          }
         }
       }
     }

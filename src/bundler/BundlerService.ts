@@ -189,6 +189,7 @@ export class BundlerService implements IBundlerService {
   private createBundle(name: string, source: IBundleSource): IBundle {
     return {
       name,
+      dir: `${this.config.options.outputDir}/${name}`,
       assets: getFilePaths(source.assets || {}),
       sources: getFilePaths(source.scripts || {}),
     };
