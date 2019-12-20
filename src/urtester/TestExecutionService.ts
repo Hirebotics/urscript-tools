@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { flatten } from 'lodash';
 import { resolve } from 'path';
 
@@ -95,6 +95,11 @@ export class TestExecutionService implements ITestExecutionService {
     merged = await this.injectMockFunctions(merged, testCode);
     merged = await this.injectTestExecution(merged, testCode);
     merged = await this.injectIntoHarness(merged);
+
+    // write test to disk
+    if (bundle.dir) {
+      writeFileSync(`${bundle.dir}/test.script`, merged);
+    }
 
     return {
       code: merged,

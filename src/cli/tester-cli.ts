@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import { readFileSync } from 'fs';
-import { merge } from 'lodash';
+import { isArray, merge, mergeWith } from 'lodash';
 import minimist from 'minimist';
 import { extname } from 'path';
 
@@ -16,10 +16,13 @@ import { logger } from '../util/logger';
 import { IURTesterCliConfig } from './types';
 
 const printHelp = () => {
-  console.log('Usage: npx urscript-tester [--bundle <config.json>] [path]');
+  console.log(
+    'Usage: npx urscript-tester [--config <config.json>] [--bundle <config.json>] [path]'
+  );
   console.log('Tool used to generate unique script bundles');
   console.log('Options:');
-  console.log('--config Configuration file');
+  console.log('--config Test configuration file');
+  console.log('--bundle Optional bundle configuration file');
   console.log('Expression (glob format) used to determine tests to execute');
 };
 
@@ -76,7 +79,7 @@ const main = async () => {
   const args = minimist(process.argv.slice(2));
 
   // get args from cli
-  const { _: path, config: configFilename } = args;
+  const { _: path, config: configFilename, bundle: bundleFilename } = args;
 
   if (!configFilename) {
     printHelp();
@@ -85,9 +88,32 @@ const main = async () => {
 
   const contents: string = readFileSync(configFilename).toString();
 
+  let bundleContents: string | undefined;
+
+  if (bundleFilename) {
+    bundleContents = readFileSync(bundleFilename).toString();
+  }
+
   try {
     const userConfig: IURTesterCliConfig = JSON.parse(contents);
     const config: IURTesterCliConfig = { ...defaultConfig };
+
+    const bundlerConfig: IBundlerConfig = bundleContents
+      ? JSON.parse(bundleContents)
+      : {
+          sources: config.sources,
+          options: {
+            bundleKey: 'test-harness',
+            bundleOutputFile: 'default',
+            outputDir: '.urscript-test',
+            scriptSuffix: 'script',
+            writeToDisk: true,
+          },
+        };
+
+    if (!bundlerConfig.sources) {
+      bundlerConfig.sources = {};
+    }
 
     merge(config, userConfig);
 
@@ -95,16 +121,21 @@ const main = async () => {
       config,
     });
 
-    const bundlerConfig: IBundlerConfig = {
-      sources: config.sources,
-      options: {
-        bundleKey: 'test-harness',
-        bundleOutputFile: 'default',
-        outputDir: '.urscript-test',
-        scriptSuffix: 'script',
-        writeToDisk: true,
-      },
-    };
+    const globalSources = {};
+
+    // merge any sources from test config if provided
+    mergeWith(
+      globalSources,
+      bundlerConfig.sources.global,
+      config.sources.global,
+      (objValue, srcValue) => {
+        if (isArray(objValue)) {
+          return objValue.concat(srcValue);
+        }
+      }
+    );
+
+    bundlerConfig.sources.global = globalSources;
 
     const scriptRunnerConfig: IScriptRunnerConfig = {
       host: config.controller.host,
