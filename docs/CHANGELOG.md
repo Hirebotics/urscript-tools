@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Hirebotics/urscript-tools/compare/v1.3.0...v1.3.1) (2020-02-07)
+
+
+### Bug Fixes
+
+* forcefully throw error on a test failure ([be48500](https://github.com/Hirebotics/urscript-tools/commit/be48500))
+
 # [1.3.0](https://github.com/Hirebotics/urscript-tools/compare/v1.2.5...v1.3.0) (2019-12-20)
 
 
