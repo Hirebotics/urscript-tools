@@ -50,6 +50,12 @@ export class TestExecutionService implements ITestExecutionService {
 
         writer.writeResults(test, results);
 
+        for (const result of results) {
+          if (result.status === 'failed') {
+            throw new Error('test failed');
+          }
+        }
+
         allResults = allResults.concat(results);
       }
     } finally {
