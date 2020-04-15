@@ -68,6 +68,8 @@ export class URScriptRunner implements IScriptRunner {
   }
 
   public async shutdown(kill: boolean = false): Promise<void> {
+    this.primaryPort = undefined;
+    
     if (this.logTail) {
       logger.info('shutting down urcontroller log monitor');
       this.logTail.kill();
