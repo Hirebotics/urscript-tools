@@ -16,6 +16,7 @@ export interface IURTesterCliConfig {
     host: string;
     port: number;
     defaultExecutionTimeout: number;
+    restartThreshold?: number;
   };
   mocks: FilePattern;
   sources: IBundleSources;

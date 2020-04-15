@@ -151,6 +151,7 @@ const main = async () => {
       runner: new URScriptRunner(scriptRunnerConfig),
       port: config.testServer.port,
       executionTimeout: config.testServer.defaultExecutionTimeout,
+      restartThreshold: config.testServer.restartThreshold
     };
 
     const executionConfig: ITestExecutionConfig = {

@@ -11,5 +11,5 @@ export interface IScriptRunnerConfig {
 export interface IScriptRunner {
   send(script: string): Promise<void>;
   launch(): Promise<boolean>;
-  shutdown(): Promise<void>;
+  shutdown(kill?: boolean): Promise<void>;
 }

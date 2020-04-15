@@ -43,6 +43,7 @@ export interface ITestRunnerConfig {
   runner: IScriptRunner;
   port: number;
   executionTimeout: number;
+  restartThreshold?: number;
 }
 
 export interface ITestRunner {
