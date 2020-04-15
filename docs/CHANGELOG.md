@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/Hirebotics/urscript-tools/compare/v1.3.1...v1.3.2) (2020-04-15)
+
+
+### Bug Fixes
+
+* added restart threshold as a band-aid to mitigate controller lockup ([78037bc](https://github.com/Hirebotics/urscript-tools/commit/78037bc))
+
 ## [1.3.1](https://github.com/Hirebotics/urscript-tools/compare/v1.3.0...v1.3.1) (2020-02-07)
 
 
