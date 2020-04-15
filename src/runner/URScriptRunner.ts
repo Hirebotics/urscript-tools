@@ -68,8 +68,6 @@ export class URScriptRunner implements IScriptRunner {
   }
 
   public async shutdown(kill: boolean = false): Promise<void> {
-    this.primaryPort = undefined;
-    
     if (this.logTail) {
       logger.info('shutting down urcontroller log monitor');
       this.logTail.kill();
@@ -78,6 +76,7 @@ export class URScriptRunner implements IScriptRunner {
 
     if (kill || this.config.controller.autoStop) {
       await this.stop();
+      this.primaryPort = undefined;
     }
   }
 
