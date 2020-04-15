@@ -44,7 +44,7 @@ export class TestRunner implements ITestRunner {
     let threshold = restartThreshold || Number.MAX_VALUE;
 
     // kill server after so many invocations
-    if(this.numberOfInvocations > threshold) {
+    if(this.numberOfInvocations >= threshold) {
       await this.stop();
     }
 
