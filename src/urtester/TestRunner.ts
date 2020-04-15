@@ -31,6 +31,7 @@ export class TestRunner implements ITestRunner {
   private testReject: (reason: any) => void;
 
   private results: Array<ITestResult> = [];
+  private numberOfInvocations: number = 0;
 
   constructor(config: ITestRunnerConfig) {
     this.config = config;
@@ -38,7 +39,14 @@ export class TestRunner implements ITestRunner {
   }
 
   public async run(test: ITestFile): Promise<ITestResult[]> {
-    const { runner } = this.config;
+    const { restartThreshold, runner } = this.config;
+
+    let threshold = restartThreshold || Number.MAX_VALUE;
+
+    // kill server after so many invocations
+    if(this.numberOfInvocations > threshold) {
+      await this.stop();
+    }
 
     // make sure runner is launched before starting result server
     await runner.launch();
@@ -53,6 +61,8 @@ export class TestRunner implements ITestRunner {
 
     // send test file to the script runner
     await runner.send(test.code);
+    
+    this.numberOfInvocations++;
 
     // TODO - bad pattern here, but we don't know the test
     // is complete until the server receives an execution complete
@@ -77,8 +87,10 @@ export class TestRunner implements ITestRunner {
     }
 
     if (runner) {
-      await runner.shutdown();
+      await runner.shutdown(true);
     }
+
+    this.numberOfInvocations = 0;
   }
 
   private async testExecutionComplete(): Promise<void> {

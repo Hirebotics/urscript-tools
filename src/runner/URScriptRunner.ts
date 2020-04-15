@@ -67,14 +67,14 @@ export class URScriptRunner implements IScriptRunner {
     }
   }
 
-  public async shutdown(): Promise<void> {
+  public async shutdown(kill: boolean = false): Promise<void> {
     if (this.logTail) {
       logger.info('shutting down urcontroller log monitor');
       this.logTail.kill();
       this.logTail = undefined;
     }
 
-    if (this.config.controller.autoStop) {
+    if (kill || this.config.controller.autoStop) {
       await this.stop();
     }
   }

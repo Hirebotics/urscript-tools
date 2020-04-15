@@ -13,7 +13,8 @@
   "testServer": {
     "host": "autodiscover",
     "port": 24493,
-    "defaultExecutionTimeout": 10000
+    "defaultExecutionTimeout": 10000,
+    "restartThreshold": 30
   },
   "mocks": {
     "include": ["__mocks__/**/*.mock.script"]
