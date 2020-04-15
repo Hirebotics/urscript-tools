@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/Hirebotics/urscript-tools/compare/v1.3.3...v1.3.4) (2020-04-15)
+
+
+### Bug Fixes
+
+* fixed conditional to execute correct number of test for threshold ([ac2cc71](https://github.com/Hirebotics/urscript-tools/commit/ac2cc71))
+
 ## [1.3.3](https://github.com/Hirebotics/urscript-tools/compare/v1.3.2...v1.3.3) (2020-04-15)
 
 
