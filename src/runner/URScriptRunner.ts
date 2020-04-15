@@ -76,6 +76,7 @@ export class URScriptRunner implements IScriptRunner {
 
     if (kill || this.config.controller.autoStop) {
       await this.stop();
+      this.primaryPort = undefined;
     }
   }
 
