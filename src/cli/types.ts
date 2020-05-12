@@ -1,17 +1,7 @@
 import { FilePattern, IBundleSources } from '../bundler/types';
 
 export interface IURTesterCliConfig {
-  controller: {
-    host: string;
-    ports: {
-      primary: number;
-    };
-    autoLaunch: {
-      disabled: boolean;
-      version: string;
-      stop: boolean;
-    };
-  };
+  controller: IControllerConfig;
   testServer: {
     host: string;
     port: number;
@@ -20,4 +10,20 @@ export interface IURTesterCliConfig {
   };
   mocks: FilePattern;
   sources: IBundleSources;
+}
+
+export interface IURRunnerCliConfig {
+  controller: IControllerConfig;
+}
+
+interface IControllerConfig {
+  host: string;
+  ports: {
+    primary: number;
+  };
+  autoLaunch: {
+    disabled: boolean;
+    version: string;
+    stop: boolean;
+  };
 }

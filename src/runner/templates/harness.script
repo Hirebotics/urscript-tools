@@ -1,0 +1,67 @@
+confirm user safety parameters
+power on
+set robotmode run
+
+def urscript_runner():
+  global RUNNER_SOCKET_NAME = "runner_socket"
+
+  def runner_initialize(host, port):
+    socket_open(host, port, RUNNER_SOCKET_NAME)
+    runner_notifyServer(
+      runner_createKeyValuePair("type", "EXECUTION_STARTED", False)
+    )
+  end
+
+  def runner_shutdown():
+    runner_notifyServer(
+      runner_createKeyValuePair("type", "EXECUTION_STOPPED", False)
+    )
+    socket_close(RUNNER_SOCKET_NAME)
+  end
+
+  thread runner_keepAlive():
+    while(True):
+      runner_notifyServer(
+        runner_createKeyValuePair("type", "KEEP_ALIVE", False)
+      )
+      sleep(.5)
+    end
+  end
+
+  def runner_log_message(message):
+    local message = runner_createKeyValuePair("message", message)
+    local type = runner_createKeyValuePair("type", "LOG_MESSAGE", False)
+
+    runner_notifyServer(
+      str_cat(message, type)
+    )
+  end
+
+  def runner_notifyServer(message):
+    local packet = str_cat(message, "$^")
+    socket_send_line(packet, RUNNER_SOCKET_NAME)
+  end
+
+  def runner_createKeyValuePair(key, value, appendDelimiter = True):
+    local pair = str_cat(key, "&&&")
+    pair = str_cat(pair, value)
+
+    if(appendDelimiter):
+      pair = str_cat(pair, "+++")
+    end
+    return pair
+  end 
+
+  {{ startup }}
+
+  run runner_keepAlive()
+
+  sync()
+  
+  {{ script_code }}
+
+  sync()
+
+  runner_shutdown()
+
+end

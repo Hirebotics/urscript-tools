@@ -6,10 +6,21 @@ export interface IScriptRunnerConfig {
     autoStop: boolean;
     controllerVersion: string;
   };
+  messageHandler?: IURScriptMessageHandler;
 }
 
 export interface IScriptRunner {
   send(script: string): Promise<void>;
   launch(): Promise<boolean>;
   shutdown(kill?: boolean): Promise<void>;
+  isRunning(): Promise<boolean>;
+}
+
+export interface IURScriptMessageHandlerConfig {
+  throwExceptionOnError?: boolean;
+}
+
+export interface IURScriptMessageHandler {
+  stdout(message: string): Promise<void>;
+  stderr(message: string): Promise<void>;
 }
