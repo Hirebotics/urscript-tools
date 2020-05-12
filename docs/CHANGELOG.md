@@ -1,3 +1,16 @@
+# [1.4.0](https://github.com/Hirebotics/urscript-tools/compare/v1.3.4...v1.4.0) (2020-05-12)
+
+
+### Bug Fixes
+
+* added Contextual error to message handler ([506d336](https://github.com/Hirebotics/urscript-tools/commit/506d336))
+
+
+### Features
+
+* added includeInfoMessages messages flag for script message handler ([6ad8508](https://github.com/Hirebotics/urscript-tools/commit/6ad8508))
+* new urscript runner cli tool ([dff65d3](https://github.com/Hirebotics/urscript-tools/commit/dff65d3))
+
 ## [1.3.4](https://github.com/Hirebotics/urscript-tools/compare/v1.3.3...v1.3.4) (2020-04-15)
 
 
