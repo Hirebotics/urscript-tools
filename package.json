@@ -5,10 +5,11 @@
   "main": "dist/index.js",
   "bin": {
     "urscript-bundler": "dist/cli/bundler-cli.js",
-    "urscript-tester": "dist/cli/tester-cli.js"
+    "urscript-tester": "dist/cli/tester-cli.js",
+    "urscript-runner": "dist/cli/runner-cli.js"
   },
   "scripts": {
-    "dist": "npx tsc && copyfiles -u 1 src/urtester/templates/*.script dist",
+    "dist": "npx tsc && copyfiles -u 1 src/**/templates/**/*.script dist",
     "start": "npx tsc && node dist/index.js",
     "test": "npx jest",
     "test-coverage": "npx jest --coverage",

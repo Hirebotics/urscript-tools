@@ -1,0 +1,13 @@
+{
+  "controller": {
+    "host": "localhost",
+    "ports": {
+      "primary": 30001
+    },
+    "autoLaunch": {
+      "disabled": false,
+      "version": "5.3.1",
+      "stop": false
+    }
+  }
+}

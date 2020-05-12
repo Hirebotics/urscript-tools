@@ -1,11 +1,15 @@
-import chalk from 'chalk';
 import childProcess, { ChildProcessWithoutNullStreams } from 'child_process';
 import getPort from 'get-port';
 import { createConnection } from 'net';
 
 import { getDockerContainerId } from '../util/docker';
 import { logger } from '../util/logger';
-import { IScriptRunner, IScriptRunnerConfig } from './types';
+import {
+  IScriptRunner,
+  IScriptRunnerConfig,
+  IURScriptMessageHandler
+} from './types';
+import { URScriptMessageHandler } from './URScriptMessageHandler';
 
 export class URScriptRunner implements IScriptRunner {
   private config: IScriptRunnerConfig;
@@ -13,7 +17,10 @@ export class URScriptRunner implements IScriptRunner {
   private primaryPort: number | undefined;
 
   constructor(config: IScriptRunnerConfig) {
-    this.config = config;
+    this.config = {
+      messageHandler: new URScriptMessageHandler(),
+      ...config,
+    };
   }
 
   public async send(script: string): Promise<void> {
@@ -80,6 +87,16 @@ export class URScriptRunner implements IScriptRunner {
     }
   }
 
+  public async isRunning(): Promise<boolean> {
+    const containerId = await this.getContainerId();
+
+    if (containerId && containerId !== '') {
+      return true;
+    }
+
+    return false;
+  }
+
   private async sendToController(script: string) {
     const { host } = this.config;
 
@@ -120,21 +137,25 @@ export class URScriptRunner implements IScriptRunner {
 
     this.logTail = childProcess.spawn(command, args as any);
 
-    const prefix = chalk.blue('urcontroller');
+    const messageHandler = this.config
+      .messageHandler as IURScriptMessageHandler;
 
     this.logTail.stdout.on('data', data => {
       data
         .toString()
         .split('\n')
-        .filter(line => line !== '' && line.indexOf('INFO') < 0)
-        .forEach(line => console.log(`${prefix}: ${line}`));
+        .forEach(message => {
+          messageHandler.stdout(message);
+        });
     });
 
     this.logTail.stderr.on('data', data => {
       data
         .toString()
         .split('\n')
-        .forEach(line => console.log(`${prefix}: ${chalk.red(line)}`));
+        .forEach(message => {
+          messageHandler.stderr(message);
+        });
     });
   }
 
@@ -188,16 +209,6 @@ export class URScriptRunner implements IScriptRunner {
     }
 
     return this.config.port;
-  }
-
-  private async isRunning(): Promise<boolean> {
-    const containerId = await this.getContainerId();
-
-    if (containerId && containerId !== '') {
-      return true;
-    }
-
-    return false;
   }
 
   private async getContainerId(): Promise<string | undefined> {
