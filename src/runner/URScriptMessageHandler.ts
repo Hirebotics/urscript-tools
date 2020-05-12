@@ -19,6 +19,7 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
   constructor(config?: IURScriptMessageHandlerConfig) {
     this.config = {
       throwExceptionOnError: false,
+      includeInfoMessages: false,
       ...config,
     };
   }
@@ -31,7 +32,10 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
         if (this.config.throwExceptionOnError) {
           throw new Error(message);
         }
-      } else if (message.indexOf('INFO') < 0) {
+      } else if (
+        message.indexOf('INFO') < 0 ||
+        this.config.includeInfoMessages
+      ) {
         console.log(`${this.prefix}: ${message}`);
       }
     }

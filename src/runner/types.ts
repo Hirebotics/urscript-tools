@@ -18,6 +18,7 @@ export interface IScriptRunner {
 
 export interface IURScriptMessageHandlerConfig {
   throwExceptionOnError?: boolean;
+  includeInfoMessages?: boolean;
 }
 
 export interface IURScriptMessageHandler {
