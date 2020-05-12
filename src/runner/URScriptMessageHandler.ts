@@ -9,6 +9,7 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
   private prefix = chalk.blue('urcontroller');
   private errorKeywords: string[] = [
     'Compile error',
+    'Contextual error',
     'Lexer exception',
     'Runtime error',
     'Syntax error',
