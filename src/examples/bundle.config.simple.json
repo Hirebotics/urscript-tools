@@ -1,0 +1,17 @@
+{
+  "sources": {
+    "global": {
+      "scripts": {
+        "include": ["src/*.script"],
+        "exclude": []
+      }
+    }
+  },
+  "options": {
+    "bundleKey": "default",
+    "bundleOutputFile": "program",
+    "scriptSuffix": "script",
+    "outputDir": "dist",
+    "writeToDisk": true
+  }
+}
