@@ -16,7 +16,7 @@
     "format": "npx prettier --write \"src/**/*.ts\""
   },
   "author": "Zach Boyd",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hirebotics/urscript-tools.git"
