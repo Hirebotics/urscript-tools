@@ -22,7 +22,7 @@
     "url": "git+https://github.com/Hirebotics/urscript-tools.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "access": "public"
   },
   "keywords": [
     "universal",
