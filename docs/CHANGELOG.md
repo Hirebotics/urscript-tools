@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/Hirebotics/urscript-tools/compare/v1.4.0...v1.4.1) (2020-05-13)
+
+
+### Bug Fixes
+
+* fixed error if textmsg was invoked with a non-string data type ([d2d6f26](https://github.com/Hirebotics/urscript-tools/commit/d2d6f26fa4d622e88372069dbd7d4c5d21171a0c))
+
 # [1.4.0](https://github.com/Hirebotics/urscript-tools/compare/v1.3.4...v1.4.0) (2020-05-12)
 
 
