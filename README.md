@@ -98,12 +98,12 @@ with your script
 
 ### URScript Tester
 
-The script tester provides the ability to write unit test against your URScript code. Writing unit test can be a great way to ensure your code works before deploying to production and this process can easily be integrated into your existing build processes.
+The script tester provides the ability to write unit tests against your URScript code. Writing unit tests can be a great way to ensure your code works before deploying to production and this process can easily be integrated into your existing build processes.
 
 #### Features
 
 - Unit test
-  - Each test file can contain multiple unit test and the test framework can match against wildcard patterns to execute tests
+  - Each test file can contain multiple unit tests and the test framework can match against wildcard patterns to execute tests
   - Controller output directly to console
 - Mock support
   - Allows user to mock any built-in or custom urscript function for testing purposes
@@ -167,7 +167,7 @@ def test_getStandardDigitalIn_True():
   local result = get_standard_digital_in(0)
 
   assertEqual(
-    name = "add",
+    name = "validate signal level - true",
     result = result,
     expected = signalLevel
   )
@@ -176,13 +176,13 @@ end
 
 def test_getStandardDigitalIn_False():
 
-  # force a return value of True for our mock
+  # force a return value of False for our mock
   signalLevel = False
 
   local result = get_standard_digital_in(0)
 
   assertEqual(
-    name = "add",
+    name = "validate signal level - false",
     result = result,
     expected = signalLevel
   )
