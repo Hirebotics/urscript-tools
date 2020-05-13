@@ -93,8 +93,7 @@ Refer to the [`URScript Tools Example Project`](https://github.com/Hirebotics/ur
 
 #### Addtional Notes
 
-The bundler supports copying static assets such as a URP, installation file, or any other file type you want delivered
-with your script
+The bundler supports copying static assets such as a URP, installation file, or any other file type you want delivered with your script
 
 ### URScript Tester
 
