@@ -20,7 +20,7 @@
 
 ## Overview
 
-URScript Tools is a suite of tools aimed to enhance the developer experience around URscript. These tools allow you to run URScript locally against a URController without the need for a cobot or a complicated VM setup.
+URScript Tools is a suite of tools aimed to enhance the developer experience around URScript. These tools allow you to run URScript locally against a URController without the need for a cobot or a complicated VM setup.
 
 ## Quick Start
 
@@ -48,7 +48,7 @@ Hello, welcome to urscript-tools!
 Congrats! Your environment is now setup to run urscript tools. Browse the example project to see advanced usage
 on how to use each of the tools
 
-## Documenation
+## Documentation
 
 ### URScript Runner
 
@@ -104,9 +104,9 @@ The script tester provides the ability to write unit tests against your URScript
 
 - Unit test
   - Each test file can contain multiple unit tests and the test framework can match against wildcard patterns to execute tests
-  - Controller output directly to console
+  - Controller prints output directly to the console
 - Mock support
-  - Allows user to mock any built-in or custom urscript function for testing purposes
+  - Allows the user to mock any built-in or custom urscript function for testing purposes
 - Additional Capabilities
   - Before Each
     - Invoke logic before each test
@@ -122,7 +122,7 @@ Example configuration
 
 #### Test Syntax
 
-`test_<myFunctionName>`
+`test_<myTestName>`
 
 Example Test:
 
@@ -135,14 +135,14 @@ def test_add():
   local result = add(5, 5)
 
   assertEqual(
-    name = "add",
+    name = "add - equals",
     result = result,
     expected = 10
   )
 end
 ```
 
-Example Output:
+Sample Results:
 
 <p><img src="docs/images/basic-test-output.png" alt="Basic test output" /></p>
 
