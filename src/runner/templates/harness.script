@@ -28,8 +28,8 @@ def urscript_runner():
     end
   end
 
-  def runner_log_message(message):
-    local message = runner_createKeyValuePair("message", message)
+  def runner_log_message(str1, str2 = ""):
+    local message = runner_createKeyValuePair("message", str_cat(str1, str2))
     local type = runner_createKeyValuePair("type", "LOG_MESSAGE", False)
 
     runner_notifyServer(
