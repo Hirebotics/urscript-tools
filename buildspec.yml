@@ -1,15 +1,12 @@
 version: 0.2
 env:
   parameter-store:
-    GITHUB_TOKEN: /github/automation_token
+    NPM_TOKEN: /npm/automation_token
   git-credential-helper: yes
 phases:
   install:
     runtime-versions:
       nodejs: 10
-  pre_build:
-    commands:
-      - echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > .npmrc
   build:
     commands:
       - npm i
