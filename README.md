@@ -26,7 +26,7 @@ URScript Tools is a suite of tools aimed to enhance the developer experience aro
 
 - Mac OS X
 - Linux
-- Windows is not supported at ths time
+- Windows is not supported at this time
 
 ## Quick Start
 
