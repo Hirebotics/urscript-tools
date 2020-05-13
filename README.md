@@ -22,6 +22,12 @@
 
 URScript Tools is a suite of tools aimed to enhance the developer experience around URScript. These tools allow you to run URScript locally against a URController without the need for a cobot or a complicated VM setup.
 
+**Platform Support**
+
+- Mac OS X
+- Linux
+- Windows is not supported at this time
+
 ## Quick Start
 
 To get started we need to install a few dependencies
