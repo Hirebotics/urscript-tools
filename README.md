@@ -45,6 +45,8 @@ Output:
 Hello, welcome to urscript-tools!
 ```
 
+<p><img src="docs/images/Hello_example.png" alt="Hello Example" /></p>
+
 Congrats! Your environment is now setup to run urscript tools. Browse the example project to see advanced usage
 on how to use each of the tools
 
