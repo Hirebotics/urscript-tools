@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import * as mkdirp from 'mkdirp';
 import moment from 'moment';
 
@@ -42,11 +42,7 @@ export class BundlerService implements IBundlerService {
   };
 
   constructor(config?: IBundlerConfig) {
-    // TODO perform deep merge instead of spread
-    this.config = {
-      ...this.config,
-      ...config,
-    };
+    merge(this.config, config);
   }
 
   public async bundleAll(): Promise<IBundles> {
