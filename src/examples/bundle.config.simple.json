@@ -12,6 +12,7 @@
     "bundleOutputFile": "program",
     "scriptSuffix": "script",
     "outputDir": "dist",
-    "writeToDisk": true
+    "writeToDisk": true,
+    "stripComments": true
   }
 }

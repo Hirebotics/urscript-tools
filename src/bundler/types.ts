@@ -4,9 +4,9 @@ export interface IBundlerConfig {
     bundleKey?: string;
     bundleOutputFile?: string;
     outputDir?: string;
-    appendGitCommitHash?: boolean;
     writeToDisk?: boolean;
     scriptSuffix?: string;
+    stripComments?: boolean;
   };
 }
 
