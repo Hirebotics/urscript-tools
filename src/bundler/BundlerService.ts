@@ -32,7 +32,7 @@ export class BundlerService implements IBundlerService {
       global: {},
     },
     options: {
-      bundleKey: 'default',
+      bundleKey: '',
       outputDir: 'bundle-dist',
       writeToDisk: true,
       scriptSuffix: 'script',
@@ -100,7 +100,7 @@ export class BundlerService implements IBundlerService {
 
     if (!hasPermutations) {
       const defaultBundleKey = this.config.options.bundleKey as string;
-      if (global && defaultBundleKey) {
+      if (global) {
         bundles[defaultBundleKey] = this.createBundle(defaultBundleKey, global);
       }
     } else if (permutations) {
