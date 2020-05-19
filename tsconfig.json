@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
-    "declaration": false,
+    "declaration": true,
     "rootDir": "src",
     "outDir": "dist",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "preserveConstEnums": true,
     "strictNullChecks": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
