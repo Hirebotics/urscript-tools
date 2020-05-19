@@ -25,3 +25,7 @@ export interface IURScriptMessageHandler {
   stdout(message: string): Promise<void>;
   stderr(message: string): Promise<void>;
 }
+
+export interface IScriptExecutorConfig {
+  onLogMessage?: (message: string) => void;
+}
