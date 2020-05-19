@@ -48,7 +48,14 @@ const main = async () => {
 
   const file = fs.readFileSync(files[0]).toString();
 
+  process.on('unhandledRejection', async (err) => {
+    console.log(err);
+    await executor.stop();
+    process.exit(0);
+  });
+
   await executor.run(file);
+  await executor.stop();
 };
 
 const getRunnerCliConfig = (configFile?: string): IURRunnerCliConfig => {

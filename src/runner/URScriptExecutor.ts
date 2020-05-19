@@ -21,6 +21,9 @@ export class URScriptExecutor {
   private serverHost: string;
   private serverPort: number;
 
+  private runResolve: () => void;
+  private runReject: (err: Error) => void;
+
   constructor(runner: URScriptRunner, config?: IScriptExecutorConfig) {
     this.runner = runner;
 
@@ -40,13 +43,12 @@ export class URScriptExecutor {
       this.serverPort
     );
 
-    await this.runner.send(wrappedScript);
-
     this.startExecutionTimeout(2000);
 
-    process.on('unhandledRejection', async (err) => {
-      await this.stop();
-      throw err;
+    return new Promise((resolve, reject) => {
+      this.runResolve = resolve;
+      this.runReject = reject;
+      this.runner.send(wrappedScript);
     });
   }
 
@@ -55,7 +57,10 @@ export class URScriptExecutor {
       this.server.close();
       this.server = undefined;
     }
-    this.runner.shutdown();
+
+    if (this.runner) {
+      await this.runner.shutdown();
+    }
   }
 
   private async createServer(): Promise<void> {
@@ -63,7 +68,9 @@ export class URScriptExecutor {
     this.serverPort = await getPort();
 
     this.server = await this.startServer(this.serverPort, () => {
-      this.runner.shutdown();
+      if (this.runResolve) {
+        this.runResolve();
+      }
     });
   }
 
@@ -95,7 +102,9 @@ export class URScriptExecutor {
     this.clearExecutionTimeout();
 
     this.executionTimeout = setTimeout(() => {
-      throw new Error('execution timed out');
+      if (this.runReject) {
+        this.runReject(new Error('execution timed out'));
+      }
     }, timeout);
   }
 
@@ -125,7 +134,6 @@ export class URScriptExecutor {
               this.clearExecutionTimeout();
             } else if (type === 'EXECUTION_STOPPED') {
               this.connections.forEach((c) => c.end());
-              server.close();
               onExecutionStopped();
             }
           }
