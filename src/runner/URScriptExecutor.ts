@@ -21,8 +21,10 @@ export class URScriptExecutor {
   private serverHost: string;
   private serverPort: number;
 
-  private runResolve: () => void;
+  private runResolve: (messages: string[]) => void;
   private runReject: (err: Error) => void;
+
+  private executionMessages: string[] = [];
 
   constructor(runner: URScriptRunner, config?: IScriptExecutorConfig) {
     this.runner = runner;
@@ -32,7 +34,7 @@ export class URScriptExecutor {
     }
   }
 
-  public async run(script: string): Promise<void> {
+  public async run(script: string): Promise<string[]> {
     if (!this.server) {
       await this.createServer();
     }
@@ -46,6 +48,8 @@ export class URScriptExecutor {
     this.startExecutionTimeout(2000);
 
     return new Promise((resolve, reject) => {
+      this.executionMessages = [];
+
       this.runResolve = resolve;
       this.runReject = reject;
       this.runner.send(wrappedScript);
@@ -69,7 +73,7 @@ export class URScriptExecutor {
 
     this.server = await this.startServer(this.serverPort, () => {
       if (this.runResolve) {
-        this.runResolve();
+        this.runResolve(this.executionMessages);
       }
     });
   }
@@ -130,6 +134,7 @@ export class URScriptExecutor {
             const { type } = message;
             if (type === 'LOG_MESSAGE') {
               onLogMessage(message.message);
+              this.executionMessages.push(message.message);
             } else if (type === 'KEEP_ALIVE') {
               this.clearExecutionTimeout();
             } else if (type === 'EXECUTION_STOPPED') {
