@@ -7,6 +7,7 @@ import { FilePattern, IBundle, IBundles } from '../bundler/types';
 import { getFilePaths, getFilesFromPatterns } from '../util/BundleUtils';
 import { getDockerHost } from '../util/docker';
 import { logger } from '../util/logger';
+import { URTestUtils } from '../util/URTestUtils';
 import {
   ITestExecutionConfig,
   ITestExecutionService,
@@ -153,7 +154,7 @@ export class TestExecutionService implements ITestExecutionService {
   ): Promise<string> {
     let mockedCode = code;
 
-    const mocks = this.getDefinitionByRegex(testCode, /.*mock_.+\(/g);
+    const mocks = URTestUtils.extractMocks(testCode);
 
     if (mocks && mocks.length > 0) {
       // replace function definition in the merged file with
@@ -219,15 +220,15 @@ export class TestExecutionService implements ITestExecutionService {
 
     let mergedCode = code;
 
-    const tests = this.getDefinitionByRegex(testCode, /.*def.*test_.+\(/g);
+    const tests = URTestUtils.extractTests(testCode);
 
     // append execute of each test below with a call to beforeEach if it exists
     if (tests) {
-      const testLifecycleBeforeEach = this.getDefinitionByRegex(
+      const testLifecycleBeforeEach = URTestUtils.getDefinitionByRegex(
         testCode,
         /.*beforeEach\(/g
       );
-      const testLifecycleAfterEach = this.getDefinitionByRegex(
+      const testLifecycleAfterEach = URTestUtils.getDefinitionByRegex(
         testCode,
         /.*afterEach\(/g
       );
@@ -307,19 +308,6 @@ export class TestExecutionService implements ITestExecutionService {
     );
 
     return harness;
-  }
-
-  private getDefinitionByRegex(code: string, regex: RegExp): Array<string> {
-    const results = code.match(regex);
-
-    if (results) {
-      return results
-        .map((t) => t.trim())
-        .filter((t) => !t.startsWith('#'))
-        .map((t) => t.replace(/(def|thread)[\s]*/g, '').replace('(', ''));
-    }
-
-    return [];
   }
 
   private getTemplatesDir(): string {
