@@ -7,7 +7,12 @@ import { FilePattern, IBundle, IBundles } from '../bundler/types';
 import { getFilePaths, getFilesFromPatterns } from '../util/BundleUtils';
 import { getDockerHost } from '../util/docker';
 import { logger } from '../util/logger';
-import { ITestExecutionConfig, ITestExecutionService, ITestFile, ITestResult } from './types';
+import {
+  ITestExecutionConfig,
+  ITestExecutionService,
+  ITestFile,
+  ITestResult
+} from './types';
 
 export class TestExecutionService implements ITestExecutionService {
   private config: ITestExecutionConfig;
@@ -34,7 +39,7 @@ export class TestExecutionService implements ITestExecutionService {
 
     const bundles = await bundler.bundleAll();
     const promises = files.map(
-      async file => await this.createTests(file, bundles)
+      async (file) => await this.createTests(file, bundles)
     );
 
     const { writer } = this.config.results;
@@ -74,7 +79,7 @@ export class TestExecutionService implements ITestExecutionService {
       bundles,
     });
 
-    const tests = Object.values(bundles).map(bundle =>
+    const tests = Object.values(bundles).map((bundle) =>
       this.createTest(testFile, bundle)
     );
 
@@ -123,7 +128,7 @@ export class TestExecutionService implements ITestExecutionService {
       let merged = code;
 
       if (files) {
-        files.forEach(f => {
+        files.forEach((f) => {
           const mockDefinitions = readFileSync(f).toString();
           merged += `# ${f}\n\n${mockDefinitions}\n`;
         });
@@ -163,7 +168,7 @@ export class TestExecutionService implements ITestExecutionService {
 
         mockedCode = mockedCode
           .split('\n')
-          .map(line => {
+          .map((line) => {
             let modified = line.trim();
 
             if (
@@ -176,7 +181,7 @@ export class TestExecutionService implements ITestExecutionService {
 
             if (modified.indexOf(overrideFunctionName) > -1) {
               return line.replace(
-                new RegExp(`(?<!_)${overrideFunctionName}\\(`, 'g'),
+                new RegExp(`(?<!_|[A-Za-z])${overrideFunctionName}\\(`, 'g'),
                 `${mock}(`
               );
             }
@@ -239,7 +244,7 @@ export class TestExecutionService implements ITestExecutionService {
 
       mergedCode += `\ntest_framework_initialize("${host}", ${port})\n`;
 
-      tests.forEach(test => {
+      tests.forEach((test) => {
         let testExecutionCode = `
           test_framework_internal_beforeEach("${test}")
           ${hasBeforeEach ? 'beforeEach()' : '# no before each block defined'}
@@ -250,7 +255,7 @@ export class TestExecutionService implements ITestExecutionService {
 
         testExecutionCode = testExecutionCode
           .split('\n')
-          .map(line => line.trim())
+          .map((line) => line.trim())
           .join('\n');
 
         mergedCode += `${testExecutionCode}`;
@@ -270,7 +275,7 @@ export class TestExecutionService implements ITestExecutionService {
       // inject tabs into each line of modified script
       tabbedCode = tabbedCode
         .split('\n')
-        .map(line => `\t${line}`)
+        .map((line) => `\t${line}`)
         .join('\n');
     }
 
@@ -309,9 +314,9 @@ export class TestExecutionService implements ITestExecutionService {
 
     if (results) {
       return results
-        .map(t => t.trim())
-        .filter(t => !t.startsWith('#'))
-        .map(t => t.replace(/(def|thread)[\s]*/g, '').replace('(', ''));
+        .map((t) => t.trim())
+        .filter((t) => !t.startsWith('#'))
+        .map((t) => t.replace(/(def|thread)[\s]*/g, '').replace('(', ''));
     }
 
     return [];
