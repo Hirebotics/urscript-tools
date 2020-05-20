@@ -15,6 +15,10 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
     'Syntax error',
   ];
 
+  private ignoredMessages: string[] = [
+    'Exception caught: ServerSocket: Socket::OperatorOverload >> failed',
+  ];
+
   private config: IURScriptMessageHandlerConfig;
 
   constructor(config?: IURScriptMessageHandlerConfig) {
@@ -27,17 +31,23 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
 
   public async stdout(message: string): Promise<void> {
     if (message !== '') {
-      if (this.isError(message)) {
-        console.log(`${this.prefix}: ${chalk.red(message)}`);
+      const ignored: string | undefined = this.ignoredMessages.find(
+        (keyword) => message.indexOf(keyword) > -1
+      );
 
-        if (this.config.throwExceptionOnError) {
-          throw new Error(message);
+      if (ignored === undefined) {
+        if (this.isError(message)) {
+          console.log(`${this.prefix}: ${chalk.red(message)}`);
+
+          if (this.config.throwExceptionOnError) {
+            throw new Error(message);
+          }
+        } else if (
+          message.indexOf('INFO') < 0 ||
+          this.config.includeInfoMessages
+        ) {
+          console.log(`${this.prefix}: ${message}`);
         }
-      } else if (
-        message.indexOf('INFO') < 0 ||
-        this.config.includeInfoMessages
-      ) {
-        console.log(`${this.prefix}: ${message}`);
       }
     }
   }
@@ -50,7 +60,7 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
 
   protected isError(message: string): boolean {
     const keyword: string | undefined = this.errorKeywords.find(
-      keyword => message.indexOf(keyword) > -1
+      (keyword) => message.indexOf(keyword) > -1
     );
 
     return keyword ? true : false;

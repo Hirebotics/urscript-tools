@@ -1,8 +1,9 @@
 {
   "name": "@hirebotics/urscript-tools",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "Tool suite for developing in URScript",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
     "urscript-bundler": "dist/cli/bundler-cli.js",
     "urscript-tester": "dist/cli/tester-cli.js",

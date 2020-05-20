@@ -54,7 +54,7 @@ def urscript_runner():
 
   {{ startup }}
 
-  run runner_keepAlive()
+  local keepAliveThread = run runner_keepAlive()
 
   sync()
   
@@ -62,6 +62,7 @@ def urscript_runner():
 
   sync()
 
+  kill keepAliveThread
   runner_shutdown()
 
 end

@@ -1,3 +1,19 @@
+# [1.5.0](https://github.com/Hirebotics/urscript-tools/compare/v1.4.1...v1.5.0) (2020-05-20)
+
+
+### Bug Fixes
+
+* cleaned up socket after sending script commands ([7188b3d](https://github.com/Hirebotics/urscript-tools/commit/7188b3d05ae4c5734e165760757d4f793c756e1f))
+* kill keepalive thread before shutting down runner ([259a3ed](https://github.com/Hirebotics/urscript-tools/commit/259a3ed683678a5c8a0c5fe1d08d135935c74844))
+
+
+### Features
+
+* added messages as result to run script ([1790d62](https://github.com/Hirebotics/urscript-tools/commit/1790d622f013e245ff1fccfbae28ab1d239f019f))
+* moved core of runner cli into URScriptExecutor to allow reuse ([9a9d6c8](https://github.com/Hirebotics/urscript-tools/commit/9a9d6c829589e356ad49f3bc0106ca448630327b))
+* running a script blocks until execution complete ([65c8713](https://github.com/Hirebotics/urscript-tools/commit/65c8713bb52e7eb7ab82a3199b0243f78786f875))
+* updated to include types in package dist ([75db8e1](https://github.com/Hirebotics/urscript-tools/commit/75db8e1cdd752907ab0782b70737f29b0fc1dbf9))
+
 ## [1.4.1](https://github.com/Hirebotics/urscript-tools/compare/v1.4.0...v1.4.1) (2020-05-13)
 
 

@@ -56,7 +56,7 @@ export class URScriptRunner implements IScriptRunner {
 
         // delay for a few seconds after launching to give time for the
         // controller to launch
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           setTimeout(() => {
             resolve(true);
           }, 1000);
@@ -113,7 +113,8 @@ export class URScriptRunner implements IScriptRunner {
       const commands = script.split('\n');
 
       socket.on('connect', () => {
-        commands.forEach(command => socket.write(`${command}\n`));
+        commands.forEach((command) => socket.write(`${command}\n`));
+        socket.end();
         resolve();
       });
     });
@@ -140,20 +141,20 @@ export class URScriptRunner implements IScriptRunner {
     const messageHandler = this.config
       .messageHandler as IURScriptMessageHandler;
 
-    this.logTail.stdout.on('data', data => {
+    this.logTail.stdout.on('data', (data) => {
       data
         .toString()
         .split('\n')
-        .forEach(message => {
+        .forEach((message) => {
           messageHandler.stdout(message);
         });
     });
 
-    this.logTail.stderr.on('data', data => {
+    this.logTail.stderr.on('data', (data) => {
       data
         .toString()
         .split('\n')
-        .forEach(message => {
+        .forEach((message) => {
           messageHandler.stderr(message);
         });
     });
