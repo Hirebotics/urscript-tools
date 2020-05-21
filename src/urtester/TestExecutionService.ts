@@ -7,7 +7,13 @@ import { FilePattern, IBundle, IBundles } from '../bundler/types';
 import { getFilePaths, getFilesFromPatterns } from '../util/BundleUtils';
 import { getDockerHost } from '../util/docker';
 import { logger } from '../util/logger';
-import { ITestExecutionConfig, ITestExecutionService, ITestFile, ITestResult } from './types';
+import { URTestUtils } from '../util/URTestUtils';
+import {
+  ITestExecutionConfig,
+  ITestExecutionService,
+  ITestFile,
+  ITestResult
+} from './types';
 
 export class TestExecutionService implements ITestExecutionService {
   private config: ITestExecutionConfig;
@@ -34,7 +40,7 @@ export class TestExecutionService implements ITestExecutionService {
 
     const bundles = await bundler.bundleAll();
     const promises = files.map(
-      async file => await this.createTests(file, bundles)
+      async (file) => await this.createTests(file, bundles)
     );
 
     const { writer } = this.config.results;
@@ -74,7 +80,7 @@ export class TestExecutionService implements ITestExecutionService {
       bundles,
     });
 
-    const tests = Object.values(bundles).map(bundle =>
+    const tests = Object.values(bundles).map((bundle) =>
       this.createTest(testFile, bundle)
     );
 
@@ -93,12 +99,19 @@ export class TestExecutionService implements ITestExecutionService {
     let testCode = await this.getFileContents(testFile, testFile);
 
     // take the test code and inject the global mocks definition code into it
-    testCode = await this.injectGlobalMockDefinitions(testCode);
+    testCode = await URTestUtils.appendCodeFromFilePattern(
+      testCode,
+      this.config.mocks
+    );
 
     let merged = shared;
 
-    merged = await this.injectTestCode(merged, testCode);
-    merged = await this.injectMockFunctions(merged, testCode);
+    merged = URTestUtils.appendCode(merged, testCode);
+    merged = URTestUtils.replaceInvocationsWithMocks(
+      merged,
+      URTestUtils.getMockDefinitions(testCode)
+    );
+
     merged = await this.injectTestExecution(merged, testCode);
     merged = await this.injectIntoHarness(merged);
 
@@ -112,82 +125,6 @@ export class TestExecutionService implements ITestExecutionService {
       file: testFile,
       group: bundle.name,
     };
-  }
-
-  private async injectGlobalMockDefinitions(code: string): Promise<string> {
-    const pattern: FilePattern = this.config.mocks;
-
-    if (pattern) {
-      const files = getFilePaths(pattern);
-
-      let merged = code;
-
-      if (files) {
-        files.forEach(f => {
-          const mockDefinitions = readFileSync(f).toString();
-          merged += `# ${f}\n\n${mockDefinitions}\n`;
-        });
-      }
-
-      return merged;
-    }
-
-    return code;
-  }
-
-  private async injectTestCode(
-    code: string,
-    testCode: string
-  ): Promise<string> {
-    return `${code}\n\n${testCode}\n`;
-  }
-
-  private async injectMockFunctions(
-    code: string,
-    testCode: string
-  ): Promise<string> {
-    let mockedCode = code;
-
-    const mocks = this.getDefinitionByRegex(testCode, /.*mock_.+\(/g);
-
-    if (mocks && mocks.length > 0) {
-      // replace function definition in the merged file with
-      // the mock implementation function name
-
-      for (const mock of mocks) {
-        // get the function name to override
-        const overrideFunctionName = mock.replace(/mock\_/, '');
-
-        // replace references of the override name in the merged script
-        // with the mock function name
-
-        mockedCode = mockedCode
-          .split('\n')
-          .map(line => {
-            let modified = line.trim();
-
-            if (
-              modified.startsWith('def') ||
-              modified.startsWith('thread') ||
-              modified.startsWith('#')
-            ) {
-              return line;
-            }
-
-            if (modified.indexOf(overrideFunctionName) > -1) {
-              return line.replace(
-                new RegExp(`(?<!_)${overrideFunctionName}\\(`, 'g'),
-                `${mock}(`
-              );
-            }
-
-            return line;
-          })
-          .join('\n');
-      }
-    }
-
-    return mockedCode;
   }
 
   /**
@@ -214,67 +151,11 @@ export class TestExecutionService implements ITestExecutionService {
 
     let mergedCode = code;
 
-    const tests = this.getDefinitionByRegex(testCode, /.*def.*test_.+\(/g);
-
-    // append execute of each test below with a call to beforeEach if it exists
-    if (tests) {
-      const testLifecycleBeforeEach = this.getDefinitionByRegex(
-        testCode,
-        /.*beforeEach\(/g
-      );
-      const testLifecycleAfterEach = this.getDefinitionByRegex(
-        testCode,
-        /.*afterEach\(/g
-      );
-
-      const hasBeforeEach =
-        testLifecycleBeforeEach && testLifecycleBeforeEach.length === 1
-          ? true
-          : false;
-
-      const hasAfterEach =
-        testLifecycleAfterEach && testLifecycleAfterEach.length === 1
-          ? true
-          : false;
-
-      mergedCode += `\ntest_framework_initialize("${host}", ${port})\n`;
-
-      tests.forEach(test => {
-        let testExecutionCode = `
-          test_framework_internal_beforeEach("${test}")
-          ${hasBeforeEach ? 'beforeEach()' : '# no before each block defined'}
-          ${test}()
-          ${hasAfterEach ? 'afterEach()' : '# no after each block defined'}
-          test_framework_internal_afterEach("${test}")
-        `;
-
-        testExecutionCode = testExecutionCode
-          .split('\n')
-          .map(line => line.trim())
-          .join('\n');
-
-        mergedCode += `${testExecutionCode}`;
-      });
-
-      // add the internal after all invocation
-      mergedCode += `test_framework_internal_afterAll()\n`;
-    }
+    mergedCode += `\ntest_framework_initialize("${host}", ${port})\n`;
+    mergedCode = URTestUtils.appendTestCases(mergedCode, testCode);
+    mergedCode += `test_framework_internal_afterAll()\n`;
 
     return mergedCode;
-  }
-
-  private async injectFormatting(code: string): Promise<string> {
-    let tabbedCode = code;
-
-    if (tabbedCode) {
-      // inject tabs into each line of modified script
-      tabbedCode = tabbedCode
-        .split('\n')
-        .map(line => `\t${line}`)
-        .join('\n');
-    }
-
-    return tabbedCode;
   }
 
   private async injectFramework(code: string): Promise<string> {
@@ -285,7 +166,7 @@ export class TestExecutionService implements ITestExecutionService {
 
     return code.replace(
       /{{.*test_framework_code.*}}/,
-      await this.injectFormatting(framework)
+      URTestUtils.formatCode(framework)
     );
   }
 
@@ -298,23 +179,10 @@ export class TestExecutionService implements ITestExecutionService {
     harness = await this.injectFramework(harness);
     harness = harness.replace(
       /{{.*test_script_code.*}}/,
-      await this.injectFormatting(code)
+      URTestUtils.formatCode(code)
     );
 
     return harness;
-  }
-
-  private getDefinitionByRegex(code: string, regex: RegExp): Array<string> {
-    const results = code.match(regex);
-
-    if (results) {
-      return results
-        .map(t => t.trim())
-        .filter(t => !t.startsWith('#'))
-        .map(t => t.replace(/(def|thread)[\s]*/g, '').replace('(', ''));
-    }
-
-    return [];
   }
 
   private getTemplatesDir(): string {
