@@ -1,3 +1,19 @@
+# [1.6.0](https://github.com/Hirebotics/urscript-tools/compare/v1.5.0...v1.6.0) (2020-05-21)
+
+
+### Bug Fixes
+
+* extracted test injection code and added unit test ([61f0904](https://github.com/Hirebotics/urscript-tools/commit/61f0904eb83c002b6fdc7dca0282bede6bc18bd9))
+* handle scenario where test name with a keyword would get malformed ([52e00f0](https://github.com/Hirebotics/urscript-tools/commit/52e00f07eb2a6f9f439729a0e3c84f12baee4d6a))
+* mock regex to not replace when preceded by chars ([e1ce51e](https://github.com/Hirebotics/urscript-tools/commit/e1ce51ed4df175f77d4cdb5b70787a9550cb1458))
+* removed bundle key requirement for non-dimensional bundles ([a79095f](https://github.com/Hirebotics/urscript-tools/commit/a79095f8924ddffef1379f8fd91e9960ddff2092))
+* support deep merge on bundle service config ([921a5da](https://github.com/Hirebotics/urscript-tools/commit/921a5da6fdac06270ab9e2d8889e55274ff1d630))
+
+
+### Features
+
+* added support to strip comments when bundling ([3336b5b](https://github.com/Hirebotics/urscript-tools/commit/3336b5b7c6364751eef87b69f63fc738ead2cef4))
+
 # [1.5.0](https://github.com/Hirebotics/urscript-tools/compare/v1.4.1...v1.5.0) (2020-05-20)
 
 
