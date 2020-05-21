@@ -35,24 +35,6 @@ describe('URTestUtils', () => {
     expect(tests).toEqual(['test_some_default_test', 'test_thread']);
   });
 
-  test('append code', async () => {
-    const main: string = `
-      # some code here
-    `;
-
-    const codeToAppend: string = `
-      def mock_textmsg(msg1, msg2 = ""):
-        # code
-      end
-    `;
-
-    const expected: string = `${main}\n${codeToAppend}\n`;
-
-    const result: string = URTestUtils.appendCode(main, codeToAppend);
-
-    expect(result).toEqual(expected);
-  });
-
   test('append code - string', async () => {
     const baseCode: string = `
       # some code here
