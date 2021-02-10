@@ -1,14 +1,19 @@
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import * as mkdirp from 'mkdirp';
 import moment from 'moment';
 
 import { getFilePaths, mergeBundleSource } from '../util/BundleUtils';
 import { logger } from '../util/logger';
 import {
-    IBundle, IBundleDimension, IBundleDimensionFilter, IBundlerConfig, IBundlerService, IBundles,
-    IBundleSource
+  IBundle,
+  IBundleDimension,
+  IBundleDimensionFilter,
+  IBundlerConfig,
+  IBundlerService,
+  IBundles,
+  IBundleSource
 } from './types';
 
 type IBundlerConfigInternal = Required<IBundlerConfig>;
@@ -27,21 +32,17 @@ export class BundlerService implements IBundlerService {
       global: {},
     },
     options: {
-      appendGitCommitHash: true,
-      bundleKey: 'default',
+      bundleKey: '',
       outputDir: 'bundle-dist',
       writeToDisk: true,
       scriptSuffix: 'script',
       bundleOutputFile: 'default',
+      stripComments: false,
     },
   };
 
   constructor(config?: IBundlerConfig) {
-    // perform deep merge instead of spread
-    this.config = {
-      ...this.config,
-      ...config,
-    };
+    merge(this.config, config);
   }
 
   public async bundleAll(): Promise<IBundles> {
@@ -53,7 +54,7 @@ export class BundlerService implements IBundlerService {
 
     let dimensions: IBundleDimension[] = Object.keys(
       sources.dimensions || []
-    ).map(key => sources.dimensions![key]);
+    ).map((key) => sources.dimensions![key]);
 
     return this.createBundles(dimensions);
   }
@@ -66,7 +67,7 @@ export class BundlerService implements IBundlerService {
     if (dimensions && filters) {
       const filteredDimensions: Array<IBundleDimension> = [];
 
-      filters.forEach(filter => {
+      filters.forEach((filter) => {
         filteredDimensions.push({
           [filter.variationKey]:
             dimensions[filter.dimensionKey][filter.variationKey],
@@ -99,11 +100,11 @@ export class BundlerService implements IBundlerService {
 
     if (!hasPermutations) {
       const defaultBundleKey = this.config.options.bundleKey as string;
-      if (global && defaultBundleKey) {
+      if (global) {
         bundles[defaultBundleKey] = this.createBundle(defaultBundleKey, global);
       }
     } else if (permutations) {
-      Object.keys(permutations).forEach(key => {
+      Object.keys(permutations).forEach((key) => {
         const permutation = permutations[key];
         const { source } = permutation;
         bundles[key] = this.createBundle(
@@ -131,17 +132,12 @@ export class BundlerService implements IBundlerService {
    */
   private async writeBundlesToDisk(bundles: IBundles): Promise<void> {
     const {
-      options: {
-        outputDir,
-        appendGitCommitHash,
-        scriptSuffix,
-        bundleOutputFile,
-      },
+      options: { outputDir, scriptSuffix, bundleOutputFile },
     } = this.config;
 
     // create parent directory
 
-    Object.keys(bundles).forEach(bundleKey => {
+    Object.keys(bundles).forEach((bundleKey) => {
       const bundle: IBundle = bundles[bundleKey];
 
       const dir = `${outputDir}/${bundleKey}`;
@@ -161,20 +157,45 @@ export class BundlerService implements IBundlerService {
 
       let contents = `# Generated ${time}\n# ${bundleKey}\n`;
 
-      bundle.sources.forEach(file => {
+      bundle.sources.forEach((file) => {
+        let fileContents = this.transformFile(readFileSync(file).toString());
+
         contents += '# **********************************************\n';
         contents += `# Scripts from file ${file} \n`;
         contents += '# **********************************************\n\n';
-        contents += readFileSync(file).toString();
+        contents += fileContents;
         contents += '\n\n';
       });
 
-      bundle.assets.forEach(asset => {
+      bundle.assets.forEach((asset) => {
         this.copyAssets(asset, dir);
       });
 
       writeFileSync(filename, contents);
     });
+  }
+
+  private transformFile(file: string): string {
+    const {
+      options: { stripComments },
+    } = this.config;
+    let transformedLines: string[] = [];
+
+    if (file) {
+      file.split('\n').forEach((line) => {
+        const trimmed = line.trim();
+
+        if (trimmed.startsWith('#')) {
+          if (!stripComments) {
+            transformedLines.push(line);
+          }
+        } else {
+          transformedLines.push(line);
+        }
+      });
+    }
+
+    return transformedLines.join('\n');
   }
 
   private copyAssets(source, dest) {
@@ -218,7 +239,7 @@ export class BundlerService implements IBundlerService {
       const dimension: IBundleDimension = dimensions[0];
 
       if (dimensions && dimensions.length > 1) {
-        Object.keys(dimension).forEach(key => {
+        Object.keys(dimension).forEach((key) => {
           const path: string =
             prefix === '' ? key : `${prefix}${keyDelimiter}${key}`;
           this.getBundlePermutations(
@@ -229,7 +250,7 @@ export class BundlerService implements IBundlerService {
           );
         });
       } else {
-        Object.keys(dimension).forEach(key => {
+        Object.keys(dimension).forEach((key) => {
           const fullKey: string = prefix
             ? `${prefix}${keyDelimiter}${key}`
             : key;
