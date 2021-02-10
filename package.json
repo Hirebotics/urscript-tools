@@ -46,19 +46,19 @@
     "typescript": "^3.9.2"
   },
   "dependencies": {
-    "@semantic-release/changelog": "^3.0.4",
-    "@semantic-release/git": "^7.0.16",
-    "chalk": "^4.0.0",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "chalk": "^4.1.0",
     "get-port": "^5.1.1",
     "glob": "^7.1.6",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.20",
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
-    "moment": "^2.25.3",
-    "semantic-release": "^17.0.7",
-    "table": "^5.4.6",
-    "tail": "^2.0.3",
-    "winston": "^3.2.1"
+    "moment": "^2.29.1",
+    "semantic-release": "^17.3.8",
+    "table": "^6.0.7",
+    "tail": "^2.2.0",
+    "winston": "^3.3.3"
   },
   "husky": {
     "hooks": {
