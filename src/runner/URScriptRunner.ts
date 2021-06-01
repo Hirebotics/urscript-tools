@@ -7,7 +7,7 @@ import { logger } from '../util/logger';
 import {
   IScriptRunner,
   IScriptRunnerConfig,
-  IURScriptMessageHandler
+  IURScriptMessageHandler,
 } from './types';
 import { URScriptMessageHandler } from './URScriptMessageHandler';
 
@@ -59,7 +59,7 @@ export class URScriptRunner implements IScriptRunner {
         return new Promise((resolve) => {
           setTimeout(() => {
             resolve(true);
-          }, 1000);
+          }, 5000);
         });
       } catch (err) {
         logger.error('error launching controller', {
@@ -115,7 +115,7 @@ export class URScriptRunner implements IScriptRunner {
       socket.on('connect', () => {
         commands.forEach((command) => socket.write(`${command}\n`));
         socket.end();
-        resolve();
+        resolve(true);
       });
     });
   }

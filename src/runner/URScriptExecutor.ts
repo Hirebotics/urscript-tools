@@ -45,7 +45,9 @@ export class URScriptExecutor {
       this.serverPort
     );
 
-    this.startExecutionTimeout(2000);
+    await this.runner.launch();
+
+    this.startExecutionTimeout(3000);
 
     return new Promise((resolve, reject) => {
       this.executionMessages = [];
