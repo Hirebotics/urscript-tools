@@ -6,6 +6,9 @@ global TEST_LAST_RESULT = "passed"
 global TEST_LAST_RESULT_MESSAGE = ""
 
 def test_framework_initialize(host, port):
+  global TEST_HOST = host
+  global TEST_PORT = port
+
   socket_open(host, port, TEST_SOCKET_NAME)
 
   local type = test_framework_internal_createKeyValuePair("type", "EXECUTION_STARTED", False)
