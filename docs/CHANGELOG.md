@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/Hirebotics/urscript-tools/compare/v1.6.0...v1.6.1) (2021-09-30)
+
+
+### Bug Fixes
+
+* added TEST_HOST and TEST_PORT global variables ([5d9ac3f](https://github.com/Hirebotics/urscript-tools/commit/5d9ac3f68f404c41f81618b7dd0ec5514dbcf5f0))
+
 # [1.6.0](https://github.com/Hirebotics/urscript-tools/compare/v1.5.0...v1.6.0) (2020-05-21)
 
 
