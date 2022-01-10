@@ -1,3 +1,6 @@
+import * as Rx from 'rxjs';
+import { IRealtimeMessage } from '../client/rte/rte.types';
+
 export interface IScriptRunnerConfig {
   host: string;
   port: number;
@@ -14,6 +17,8 @@ export interface IScriptRunner {
   launch(): Promise<boolean>;
   shutdown(kill?: boolean): Promise<void>;
   isRunning(): Promise<boolean>;
+  getRealtimeClientObservable(): Rx.Observable<IRealtimeMessage>;
+  getConfig(): IScriptRunnerConfig;
 }
 
 export interface IURScriptMessageHandlerConfig {
