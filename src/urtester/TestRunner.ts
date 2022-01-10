@@ -266,7 +266,7 @@ export class TestRunner implements ITestRunner {
         );
 
         if (!ignore) {
-          this.testReject(`${message.level} - ${message.code}`);
+          this.testReject(`test failed - received robot code ${message.code}`);
         }
       }
     }
