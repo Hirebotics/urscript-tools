@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/Hirebotics/urscript-tools/compare/v1.6.1...v1.7.0) (2022-01-10)
+
+
+### Bug Fixes
+
+* fixed robot code error message ([5a48cdc](https://github.com/Hirebotics/urscript-tools/commit/5a48cdcd4d6c5e1d829e95ee5666cbb6bcfdee1e))
+
+
+### Features
+
+* support for failing test when error code received ([73d6475](https://github.com/Hirebotics/urscript-tools/commit/73d647592a6ba2d7fcf441db4c955334a6fa882e))
+
 ## [1.6.1](https://github.com/Hirebotics/urscript-tools/compare/v1.6.0...v1.6.1) (2021-09-30)
 
 
