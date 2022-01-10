@@ -1,12 +1,20 @@
 import chalk from 'chalk';
 import { createServer, Server, Socket } from 'net';
-
+import * as Rx from 'rxjs';
+import { RTERobotCommMessage } from '../client/rte/messages/RTERobotMessage';
+import { IRealtimeMessage } from '../client/rte/rte.types';
 import { logger } from '../util/logger';
-import { ITestFile, ITestResult, ITestRunner, ITestRunnerConfig } from './types';
+import {
+  ITestFile,
+  ITestResult,
+  ITestRunner,
+  ITestRunnerConfig,
+} from './types';
 
 enum IInternalTestMessageType {
   EXECUTION_STARTED = 'EXECUTION_STARTED',
   EXECUTION_RESULT = 'EXECUTION_RESULT',
+  IGNORE_ERROR_CODE = 'IGNORE_ERROR_CODE',
   LOG_MESSAGE = 'LOG_MESSAGE',
   TEST_EXECUTION_TIMEOUT = 'TEST_EXECUTION_TIMEOUT',
   EXECUTION_COMPLETE = 'EXECUTION_COMPLETE',
@@ -17,7 +25,7 @@ interface IInternalTestMessage {
   name?: string;
   message?: string;
   status?: string;
-  timeout?: number;
+  data?: any;
 }
 
 export class TestRunner implements ITestRunner {
@@ -33,9 +41,19 @@ export class TestRunner implements ITestRunner {
   private results: Array<ITestResult> = [];
   private numberOfInvocations: number = 0;
 
+  private realtimeMessageSubscription: Rx.Subscription;
+  private errorCodesToIgnore: Set<string> = new Set();
+
   constructor(config: ITestRunnerConfig) {
     this.config = config;
     this.handleData = this.handleData.bind(this);
+    this.handleRealtimeMessage = this.handleRealtimeMessage.bind(this);
+
+    const { runner } = this.config;
+
+    this.realtimeMessageSubscription = runner
+      .getRealtimeClientObservable()
+      .subscribe(this.handleRealtimeMessage);
   }
 
   public async run(test: ITestFile): Promise<ITestResult[]> {
@@ -44,7 +62,7 @@ export class TestRunner implements ITestRunner {
     let threshold = restartThreshold || Number.MAX_VALUE;
 
     // kill server after so many invocations
-    if(this.numberOfInvocations >= threshold) {
+    if (this.numberOfInvocations >= threshold) {
       await this.stop();
     }
 
@@ -61,7 +79,7 @@ export class TestRunner implements ITestRunner {
 
     // send test file to the script runner
     await runner.send(test.code);
-    
+
     this.numberOfInvocations++;
 
     // TODO - bad pattern here, but we don't know the test
@@ -78,9 +96,11 @@ export class TestRunner implements ITestRunner {
 
     const { runner } = this.config;
 
+    this.realtimeMessageSubscription?.unsubscribe();
+
     if (this.server) {
       logger.info('closing client connections');
-      Object.keys(this.serverConnections).forEach(k =>
+      Object.keys(this.serverConnections).forEach((k) =>
         this.serverConnections[k].destroy()
       );
       this.server.close();
@@ -101,6 +121,7 @@ export class TestRunner implements ITestRunner {
       this.testResolve(this.results);
     }
 
+    this.errorCodesToIgnore.clear();
     this.results = [];
   }
 
@@ -139,7 +160,9 @@ export class TestRunner implements ITestRunner {
         // TODO extract and allow end user to provide implementation
         console.log(`${chalk.cyan('logger')}: ${message.message}`);
       } else if (message.type === 'TEST_EXECUTION_TIMEOUT') {
-        this.startExecutionTimeout(message.timeout as number);
+        this.startExecutionTimeout(message.data as number);
+      } else if (message.type === 'IGNORE_ERROR_CODE') {
+        this.errorCodesToIgnore.add(message.data);
       } else if (message.type === 'EXECUTION_COMPLETE') {
         this.testExecutionComplete();
       }
@@ -154,7 +177,7 @@ export class TestRunner implements ITestRunner {
     if (pairs && pairs.length) {
       const obj = {};
 
-      pairs.forEach(pair => {
+      pairs.forEach((pair) => {
         const split = pair.split('&&&');
         obj[split[0].trim()] = split[1];
       });
@@ -198,15 +221,15 @@ export class TestRunner implements ITestRunner {
       try {
         const connections = this.serverConnections;
 
-        const server = createServer(socket => {
+        const server = createServer((socket) => {
           socket.on('data', dataHandler);
         }).listen(port);
 
         // manage connections
-        server.on('connection', function(conn: Socket) {
+        server.on('connection', function (conn: Socket) {
           const key = `${conn.remoteAddress}:${conn.remotePort}`;
           connections[key] = conn;
-          conn.on('close', function() {
+          conn.on('close', function () {
             delete connections[key];
           });
         });
@@ -224,6 +247,28 @@ export class TestRunner implements ITestRunner {
 
   private async handleData(data: string): Promise<void> {
     const packets = data.toString().split('$^');
-    packets.filter(p => p !== '\n').forEach(p => this.handlePacket(p));
+    packets.filter((p) => p !== '\n').forEach((p) => this.handlePacket(p));
+  }
+
+  private async handleRealtimeMessage(
+    message: IRealtimeMessage
+  ): Promise<void> {
+    if (message instanceof RTERobotCommMessage) {
+      const messageHandler = this.config.runner.getConfig().messageHandler;
+
+      if (message.level === 'info') {
+        messageHandler?.stdout(`${message.level} - ${message.code}`);
+      } else {
+        messageHandler?.stderr(`${message.level} - ${message.code}`);
+
+        const ignore = Array.from(this.errorCodesToIgnore).find((code) =>
+          message.code.startsWith(code)
+        );
+
+        if (!ignore) {
+          this.testReject(`test failed - received robot code ${message.code}`);
+        }
+      }
+    }
   }
 }

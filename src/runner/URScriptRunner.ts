@@ -1,13 +1,15 @@
 import childProcess, { ChildProcessWithoutNullStreams } from 'child_process';
 import getPort from 'get-port';
 import { createConnection } from 'net';
-
+import * as Rx from 'rxjs';
+import { RTEClient } from '../client/rte/rte';
+import { IRealtimeMessage } from '../client/rte/rte.types';
 import { getDockerContainerId } from '../util/docker';
 import { logger } from '../util/logger';
 import {
   IScriptRunner,
   IScriptRunnerConfig,
-  IURScriptMessageHandler
+  IURScriptMessageHandler,
 } from './types';
 import { URScriptMessageHandler } from './URScriptMessageHandler';
 
@@ -15,6 +17,11 @@ export class URScriptRunner implements IScriptRunner {
   private config: IScriptRunnerConfig;
   private logTail: ChildProcessWithoutNullStreams | undefined;
   private primaryPort: number | undefined;
+
+  private rteClientInitialized: boolean;
+  private rteClient: RTEClient;
+  private rteClientSubscription: Rx.Subscription;
+  private rteMessageSubject = new Rx.Subject<IRealtimeMessage>();
 
   constructor(config: IScriptRunnerConfig) {
     this.config = {
@@ -30,11 +37,17 @@ export class URScriptRunner implements IScriptRunner {
       throw new Error('failed to auto launch controller');
     }
 
+    await this.initializeRTEClient();
+
     if (!this.logTail) {
       await this.startLogMonitor();
     }
 
     await this.sendToController(script);
+  }
+
+  public getConfig(): IScriptRunnerConfig {
+    return this.config;
   }
 
   public async launch(): Promise<boolean> {
@@ -97,6 +110,10 @@ export class URScriptRunner implements IScriptRunner {
     return false;
   }
 
+  public getRealtimeClientObservable(): Rx.Observable<IRealtimeMessage> {
+    return this.rteMessageSubject.asObservable();
+  }
+
   private async sendToController(script: string) {
     const { host } = this.config;
 
@@ -104,7 +121,7 @@ export class URScriptRunner implements IScriptRunner {
       this.primaryPort = await this.getRealtimePort();
     }
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, _reject) => {
       const socket = createConnection({
         host,
         port: this.primaryPort as number,
@@ -167,6 +184,12 @@ export class URScriptRunner implements IScriptRunner {
       command,
     });
 
+    this.rteClientSubscription?.unsubscribe();
+
+    if (this.rteClient) {
+      await this.rteClient.disconnect();
+    }
+
     if (command) {
       try {
         await childProcess.execSync(command);
@@ -180,6 +203,26 @@ export class URScriptRunner implements IScriptRunner {
     }
 
     return false;
+  }
+
+  private async initializeRTEClient(): Promise<void> {
+    if (this.rteClientInitialized) {
+      return;
+    }
+
+    const realtimePort = await this.getRealtimePort();
+
+    this.rteClient = new RTEClient({
+      host: this.config.host,
+      port: realtimePort,
+    });
+
+    const observable = await this.rteClient.connect();
+    this.rteClientSubscription = observable.subscribe((m) => {
+      this.rteMessageSubject.next(m);
+    });
+
+    this.rteClientInitialized = true;
   }
 
   private async getRealtimePort(): Promise<number> {

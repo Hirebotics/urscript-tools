@@ -1,8 +1,7 @@
 import chalk from 'chalk';
-
 import {
   IURScriptMessageHandler,
-  IURScriptMessageHandlerConfig
+  IURScriptMessageHandlerConfig,
 } from './types';
 
 export class URScriptMessageHandler implements IURScriptMessageHandler {
@@ -54,7 +53,7 @@ export class URScriptMessageHandler implements IURScriptMessageHandler {
 
   public async stderr(message: string): Promise<void> {
     if (message !== '') {
-      console.log(`stderr: ${chalk.red(message)}`);
+      console.log(`${this.prefix}: ${chalk.red(message)}`);
     }
   }
 

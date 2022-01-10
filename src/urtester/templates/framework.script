@@ -97,10 +97,19 @@ def assertEqual(name, result, expected):
 end
 
 def setTestExecutionTimeout(timeout): 
-  local executionTimeout = test_framework_internal_createKeyValuePair("timeout", timeout)
+  local data = test_framework_internal_createKeyValuePair("data", timeout)
   local type = test_framework_internal_createKeyValuePair("type", "TEST_EXECUTION_TIMEOUT", False)
 
   test_framework_internal_notifyServer(
-    str_cat(executionTimeout, type)
+    str_cat(data, type)
+  )
+end
+
+def setIgnoreErrorCode(code): 
+  local data = test_framework_internal_createKeyValuePair("data", code)
+  local type = test_framework_internal_createKeyValuePair("type", "IGNORE_ERROR_CODE", False)
+
+  test_framework_internal_notifyServer(
+    str_cat(data, type)
   )
 end
