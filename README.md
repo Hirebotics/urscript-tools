@@ -149,7 +149,15 @@ def test_add():
 end
 ```
 
+Sample Usage:
+
+```Bash
+npx urscript-tester --config ./examples/test-basic/urtester.config.json ./examples/test-basic/__tests__/*
+```
+
+
 Sample Results:
+
 
 <p><img src="docs/images/basic-test-output.png" alt="Basic test output" /></p>
 
