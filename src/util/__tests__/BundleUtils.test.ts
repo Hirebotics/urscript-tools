@@ -4,7 +4,7 @@ import { FilePattern, IBundleSource } from '../../bundler/types';
 import { getFilePaths, getFilesFromPatterns, mergeBundleSource } from '../BundleUtils';
 
 describe('file path tests', () => {
-  const rootFolder = './src/util/__tests__/path';
+  const rootFolder = 'src/util/__tests__/path';
 
   const filePatterns: FilePattern = {
     include: [`${rootFolder}/**/*.script`, `${rootFolder}/folder2/**/*.script`],

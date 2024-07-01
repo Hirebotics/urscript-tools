@@ -1,5 +1,5 @@
 import * as glob from 'glob';
-import { difference, isArray, mergeWith, uniq } from 'lodash';
+import { difference, isArray, mergeWith, uniq, reverse } from 'lodash';
 
 import { FilePattern, IBundleSource } from '../bundler/types';
 
@@ -36,7 +36,9 @@ export const getFilesFromPatterns = (
     });
   }
 
-  return uniq(allFiles);
+  // after package upgrades the file order was reversed so we reverse the final
+  // array to match original functionality and unit test
+  return reverse(uniq(allFiles));
 };
 
 /**
