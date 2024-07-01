@@ -36,9 +36,7 @@ export const getFilesFromPatterns = (
     });
   }
 
-  // after package upgrades the file order was reversed so we reverse the final
-  // array to match original functionality and unit test
-  return reverse(uniq(allFiles));
+  return uniq(allFiles);
 };
 
 /**
