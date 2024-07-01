@@ -1,25 +1,28 @@
-import { logger } from '../../../util/logger';
-import { AbstractRealtimeMessage, RTEMessageType } from '../rte.types';
-import { unpackStringFromBuffer } from '../rte.utils';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { unpackStringFromBuffer } from '../../../../util/buffer';
+import { logger } from '../../../../util/logger';
+import { MessageScope } from '../../realtime-client.types';
+import { AbstractRealtimeMessage } from '../../realtime.messages';
 import {
-  getVariableValueProcessor,
+  RTEMessageTypeInternal,
+  RTEProgramStateMessageSubType,
+} from '../rte.types';
+import {
   VariableValueProcessor,
+  getVariableValueProcessor,
 } from './processors/variables';
 import { RTEVersionMessage } from './RTEVersionMessage';
 
-enum RTEProgramStateMessageSubType {
-  GLOBAL_VARIABLES_SETUP = 0,
-  GLOBAL_VARIABLES_UPDATE = 1,
-}
-
 export class RTEProgramStateMessage extends AbstractRealtimeMessage {
+  // TODO add schema
   public static unpack(
     buffer: Buffer,
     version?: RTEVersionMessage
   ): RTEProgramStateMessage | undefined {
     const subType: number = buffer.readInt8(8);
     const startIndex = buffer.readUInt16BE(9);
-    const subTypeBuffer = buffer.slice(11);
+    const subTypeBuffer = buffer.subarray(11);
 
     if (subType === RTEProgramStateMessageSubType.GLOBAL_VARIABLES_UPDATE) {
       return RTEGlobalVariablesUpdateMessage.process(
@@ -34,13 +37,14 @@ export class RTEProgramStateMessage extends AbstractRealtimeMessage {
 
   public timestamp: Date;
 
-  constructor(type: RTEMessageType) {
-    super(type);
+  constructor(type: RTEMessageTypeInternal) {
+    super(type, MessageScope.INTERNAL);
     this.timestamp = new Date();
   }
 }
 
 export class RTEGlobalVariablesSetupMessage extends RTEProgramStateMessage {
+  // TODO add schema
   public static process(
     buffer: Buffer,
     startIndex: number
@@ -56,7 +60,7 @@ export class RTEGlobalVariablesSetupMessage extends RTEProgramStateMessage {
   private _names: string[];
 
   constructor(startIndex: number, names: string[]) {
-    super(RTEMessageType.GLOBAL_VARIABLES_SETUP);
+    super(RTEMessageTypeInternal.GLOBAL_VARIABLES_SETUP);
     this._startIndex = startIndex;
     this._names = names;
   }
@@ -71,12 +75,13 @@ export class RTEGlobalVariablesSetupMessage extends RTEProgramStateMessage {
 }
 
 export class RTEGlobalVariablesUpdateMessage extends RTEProgramStateMessage {
+  // TODO add schema
   public static process(
     buffer: Buffer,
     startIndex: number,
     version?: string
   ): RTEGlobalVariablesUpdateMessage {
-    const values: any[] = RTEGlobalVariablesUpdateMessage.unpackVariables(
+    const values = RTEGlobalVariablesUpdateMessage.unpackVariables(
       buffer,
       0,
       buffer.length,
@@ -99,9 +104,8 @@ export class RTEGlobalVariablesUpdateMessage extends RTEProgramStateMessage {
     while (start < end) {
       const variableType: number = buffer.readUInt8(start++);
 
-      const processor:
-        | VariableValueProcessor
-        | undefined = getVariableValueProcessor(variableType, version);
+      const processor: VariableValueProcessor | undefined =
+        getVariableValueProcessor(variableType, version);
 
       if (processor) {
         const result = processor(
@@ -132,7 +136,7 @@ export class RTEGlobalVariablesUpdateMessage extends RTEProgramStateMessage {
   private _values: any[];
 
   constructor(startIndex: number, values: any[]) {
-    super(RTEMessageType.GLOBAL_VARIABLES_UPDATE);
+    super(RTEMessageTypeInternal.GLOBAL_VARIABLES_UPDATE);
     this._startIndex = startIndex;
     this._values = values;
   }
