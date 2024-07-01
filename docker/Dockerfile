@@ -2,7 +2,8 @@ FROM --platform=linux/amd64 ubuntu:18.04
 
 ARG ROBOT=UR10
 ARG SIMULATOR_DIR=/ursimulator
-ARG SIMULATOR_DOWNLOAD_URL=https://s3-eu-west-1.amazonaws.com/ur-support-site/222846/URSim_Linux-5.16.1.127999.tar.gz
+ARG SIMULATOR_DOWNLOAD_URL=https://s3-eu-west-1.amazonaws.com/ur-support-site/224811/URSim_Linux-5.17.0.128818.tar.gz
+ARG SIMULATOR_VERSION=5.17.0
 
 RUN apt-get update -y &&\
     apt-get install -y --force-yes sudo wget libgcc1 libstdc++6 libc6 libcap2-bin
@@ -37,7 +38,7 @@ RUN ldconfig
 RUN mv .urcontrol/urcontrol.conf.$ROBOT .urcontrol/urcontrol.conf
 COPY safety.conf .urcontrol/safety.conf
 
-RUN echo "LD_LIBRARY_PATH=/opt/urtool-3.0/lib HOME=/ursimulator /ursimulator/./URControl -r | tee /ursimulator/URControl.log" > run-controller.sh
+RUN echo "LD_LIBRARY_PATH=/opt/urtool-3.0/lib HOME=/ursimulator /ursimulator/./URControl -m ${SIMULATOR_VERSION} -r | tee /ursimulator/URControl.log" > run-controller.sh
 RUN chmod a+x run-controller.sh
 
 EXPOSE 30001
