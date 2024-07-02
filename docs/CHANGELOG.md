@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/Hirebotics/urscript-tools/compare/v1.7.1...v1.7.2) (2024-07-02)
+
+
+### Bug Fixes
+
+* force publish ([3c2a067](https://github.com/Hirebotics/urscript-tools/commit/3c2a067af02b76a6d08940a6b14ed51b9d0a9558))
+
 ## [1.7.1](https://github.com/Hirebotics/urscript-tools/compare/v1.7.0...v1.7.1) (2024-07-02)
 
 
