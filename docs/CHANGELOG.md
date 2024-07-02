@@ -1,3 +1,10 @@
+## [1.7.3](https://github.com/Hirebotics/urscript-tools/compare/v1.7.2...v1.7.3) (2024-07-02)
+
+
+### Bug Fixes
+
+* fixed package dependencies after upgrade ([627dce2](https://github.com/Hirebotics/urscript-tools/commit/627dce2629c3481699f9c9d66cb3e6e1f7d1fed5))
+
 ## [1.7.2](https://github.com/Hirebotics/urscript-tools/compare/v1.7.1...v1.7.2) (2024-07-02)
 
 
