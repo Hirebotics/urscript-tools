@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/Hirebotics/urscript-tools/compare/v1.7.0...v1.7.1) (2024-07-02)
+
+
+### Bug Fixes
+
+* force version bump ([acd55da](https://github.com/Hirebotics/urscript-tools/commit/acd55da4fdc211317dba839b682a5be6d2a0bc02))
+
 # [1.7.0](https://github.com/Hirebotics/urscript-tools/compare/v1.6.1...v1.7.0) (2022-01-10)
 
 

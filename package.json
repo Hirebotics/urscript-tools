@@ -1,6 +1,6 @@
 {
   "name": "@hirebotics/urscript-tools",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Tool suite for developing in URScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
