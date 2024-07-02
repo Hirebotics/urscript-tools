@@ -2,8 +2,6 @@ import childProcess, { ChildProcessWithoutNullStreams } from 'child_process';
 import getPort from 'get-port';
 import { createConnection } from 'net';
 import * as Rx from 'rxjs';
-import { RTEClient } from '../client/rte/rte';
-import { IRealtimeMessage } from '../client/rte/rte.types';
 import { getDockerContainerId } from '../util/docker';
 import { logger } from '../util/logger';
 import {
@@ -12,6 +10,8 @@ import {
   IURScriptMessageHandler,
 } from './types';
 import { URScriptMessageHandler } from './URScriptMessageHandler';
+import { RTEClientImpl } from '../client/realtime/rte/rte.client';
+import { RealtimeMessage } from '../client/realtime/realtime-client.types';
 
 export class URScriptRunner implements IScriptRunner {
   private config: IScriptRunnerConfig;
@@ -19,9 +19,9 @@ export class URScriptRunner implements IScriptRunner {
   private primaryPort: number | undefined;
 
   private rteClientInitialized: boolean;
-  private rteClient: RTEClient;
+  private rteClient: RTEClientImpl;
   private rteClientSubscription: Rx.Subscription;
-  private rteMessageSubject = new Rx.Subject<IRealtimeMessage>();
+  private rteMessageSubject = new Rx.Subject<RealtimeMessage>();
 
   constructor(config: IScriptRunnerConfig) {
     this.config = {
@@ -110,7 +110,7 @@ export class URScriptRunner implements IScriptRunner {
     return false;
   }
 
-  public getRealtimeClientObservable(): Rx.Observable<IRealtimeMessage> {
+  public getRealtimeClientObservable(): Rx.Observable<RealtimeMessage> {
     return this.rteMessageSubject.asObservable();
   }
 
@@ -212,7 +212,7 @@ export class URScriptRunner implements IScriptRunner {
 
     const realtimePort = await this.getRealtimePort();
 
-    this.rteClient = new RTEClient({
+    this.rteClient = new RTEClientImpl({
       host: this.config.host,
       port: realtimePort,
     });

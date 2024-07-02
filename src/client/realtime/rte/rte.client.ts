@@ -1,34 +1,36 @@
-import { ISocketMessage } from '../socket/ObservableSocket';
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+import { SocketMessage } from '../../observable-socket.types';
+import { AbstractRealtimeClient } from '../realtime-client';
 import {
-  AbstractRealtimeClient,
-  IRealtimeClientOptions,
-} from './AbstractRealtimeClient';
+  MessageScope,
+  PacketProcessors,
+  RealtimeConnectionState,
+  RealtimeMessage,
+} from '../realtime-client.types';
+import { RTEDataPackage } from './messages/RTEDataPackage';
 import { RTEProgramStateMessage } from './messages/RTEProgramStateMessage';
 import { RTERobotMessage } from './messages/RTERobotMessage';
 import { RTERobotStateMessage } from './messages/RTERobotStateMessage';
 import { RTEVersionMessage } from './messages/RTEVersionMessage';
 import {
-  IPacketProcessors,
-  RealtimeConnectionState,
-  RTEMessage,
+  RTEClientOptions,
+  RTEMessageSourceType,
+  RTEMessageTypeInternal,
 } from './rte.types';
 
-const defaultProcessors: IPacketProcessors = {
-  [RTEMessage.PROGRAM_STATE_MESSAGE]: RTEProgramStateMessage.unpack,
-  [RTEMessage.ROBOT_MESSAGE]: RTERobotMessage.unpack,
-  [RTEMessage.ROBOT_STATE_MESSAGE]: RTERobotStateMessage.unpack,
+const defaultProcessors: PacketProcessors = {
+  [RTEMessageSourceType.PROGRAM_STATE]: RTEProgramStateMessage.unpack,
+  [RTEMessageSourceType.ROBOT_MESSAGE]: RTERobotMessage.unpack,
+  [RTEMessageSourceType.ROBOT_STATE]: RTERobotStateMessage.unpack,
 };
 
-interface IRTEClientOptions extends IRealtimeClientOptions {
-  processors?: IPacketProcessors;
-}
-
-export class RTEClient extends AbstractRealtimeClient {
-  protected options: IRTEClientOptions;
+class RTEClientImpl extends AbstractRealtimeClient {
+  protected options: RTEClientOptions;
+  private cachedDataPackage: RTEDataPackage = new RTEDataPackage();
   private partialBuffer: Buffer | undefined;
   private version: RTEVersionMessage | undefined;
 
-  constructor(options: IRTEClientOptions) {
+  constructor(options: RTEClientOptions) {
     super('rte', options);
     this.options = options;
 
@@ -37,7 +39,7 @@ export class RTEClient extends AbstractRealtimeClient {
     }
   }
 
-  protected receive(message: ISocketMessage): void {
+  protected receive(message: SocketMessage): void {
     const { eventType } = message;
 
     if (eventType === 'data' && message.data) {
@@ -60,7 +62,7 @@ export class RTEClient extends AbstractRealtimeClient {
         // packet and break out of loop
 
         if (offset + 4 > buffer.length) {
-          this.partialBuffer = buffer.slice(offset);
+          this.partialBuffer = buffer.subarray(offset);
           break;
         }
 
@@ -78,25 +80,26 @@ export class RTEClient extends AbstractRealtimeClient {
           // separately
           if (this.version === undefined) {
             this.version = RTEVersionMessage.unpack(
-              buffer.slice(offset + 5, offset + messageSize)
+              buffer.subarray(offset + 5, offset + messageSize)
             );
           } else {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const processor = this.options.processors![type];
 
             if (processor !== undefined) {
               const realtimeMessage = processor(
-                buffer.slice(offset + 5, offset + messageSize),
+                buffer.subarray(offset + 5, offset + messageSize),
                 this.version
               );
 
               if (realtimeMessage !== undefined) {
-                this.messageSubject$.next(realtimeMessage);
+                this.publish(realtimeMessage);
               }
             }
           }
         } else {
           // store the rest of the buffer for next invocation
-          this.partialBuffer = buffer.slice(offset);
+          this.partialBuffer = buffer.subarray(offset);
         }
 
         offset += messageSize;
@@ -106,5 +109,52 @@ export class RTEClient extends AbstractRealtimeClient {
 
   protected set connectionState(connectionState: RealtimeConnectionState) {
     super.connectionState = connectionState;
+
+    if (connectionState === RealtimeConnectionState.DISCONNECTED) {
+      this.cachedDataPackage = new RTEDataPackage();
+    }
+  }
+
+  /**
+   * Custom publish method that merges individual messages into the cached
+   * data package making it easier for consumers to interact with RTE
+   * state
+   *
+   * @param message
+   */
+  protected publish(message: RealtimeMessage): void {
+    // TODO this should be made more generic by forcing messages to
+    // implement a method that allows us to request the fields for
+    // the cache
+
+    let cacheUpdate: boolean = false;
+
+    if (message.type === RTEMessageTypeInternal.GLOBAL_VARIABLES_SETUP) {
+      // @ts-ignore
+      if (message.names && message.names.length > 0) {
+        // @ts-ignore
+        this.cachedDataPackage.variableNames = message;
+        cacheUpdate = true;
+      }
+    } else if (
+      message.type === RTEMessageTypeInternal.GLOBAL_VARIABLES_UPDATE
+    ) {
+      // @ts-ignore
+      if (message.values && message.values.length > 0) {
+        // @ts-ignore
+        this.cachedDataPackage.variableValues = message;
+        cacheUpdate = true;
+      }
+    }
+
+    if (cacheUpdate) {
+      this.messageSubject$.next(this.cachedDataPackage);
+    }
+
+    if (message.scope === MessageScope.PUBLIC) {
+      this.messageSubject$.next(message);
+    }
   }
 }
+
+export { RTEClientImpl };

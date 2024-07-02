@@ -1,5 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import semver from 'semver';
-import { unpackStringFromBuffer } from '../../rte.utils';
+import { unpackStringFromBuffer } from '../../../../../util/buffer';
+
+/**
+ * The following RTEDataType enums map the logical data type
+ * to their numeric codes in the RTE protocol.
+ *
+ * See section "Variable Values" in the documentation.
+ * https://s3-eu-west-1.amazonaws.com/ur-support-site/16496/ClientInterfaces_Primary.pdf
+ */
+
+/**
+ * Polyscope 3.3 or later CB-series (until 3.14)
+ * Polyscope 5.0 e-series (until 5.9)
+ */
+export enum RTEDataType_3_3__5_0 {
+  NONE = 0,
+  CONST_STRING = 3,
+  VAR_STRING = 4,
+  LIST = 5,
+  POSE = 10,
+  BOOL = 12,
+  NUM = 13,
+  INT = 14,
+  FLOAT = 15,
+}
+
+/**
+ * Polyscope 3.14 or later CB-series
+ * Polyscope 5.9 or later e-series
+ *
+ * Introduces the MATRIX type, and assigns different numeric codes.
+ */
+export enum RTEDataType_3_14__5_9 {
+  NONE = 0,
+  CONST_STRING = 3,
+  VAR_STRING = 4,
+  POSE = 12,
+  BOOL = 13,
+  NUM = 14,
+  INT = 15,
+  FLOAT = 16,
+  LIST = 17,
+  MATRIX = 18,
+}
 
 export type VariableValueProcessor = (
   buffer: Buffer,
@@ -28,14 +72,13 @@ export interface IPoseVariable {
   rz: number;
 }
 
-export const NoneValueProcessor: VariableValueProcessor = (): IVariableValueResult<
-  null
-> => {
-  return {
-    processedBytes: 0,
-    value: null,
+export const NoneValueProcessor: VariableValueProcessor =
+  (): IVariableValueResult<null> => {
+    return {
+      processedBytes: 0,
+      value: null,
+    };
   };
-};
 
 export const StringValueProcessor: VariableValueProcessor = (
   buffer: Buffer,
@@ -245,24 +288,36 @@ export const getVariableValueProcessor = (
     return processor;
   }
 
-  if (semver.satisfies(version, '>=3.14.1 <5.0.0 || >= 5.9.1')) {
+  if (semver.satisfies(version, '>=3.14 <5.0 || >= 5.9')) {
     switch (type) {
-      case 12:
+      case RTEDataType_3_14__5_9.NONE:
+        processor = NoneValueProcessor;
+        break;
+      case RTEDataType_3_14__5_9.CONST_STRING:
+        processor = StringValueProcessor;
+        break;
+      case RTEDataType_3_14__5_9.VAR_STRING:
+        processor = StringValueProcessor;
+        break;
+      case RTEDataType_3_14__5_9.POSE:
         processor = PoseValueProcessor;
         break;
-      case 13:
+      case RTEDataType_3_14__5_9.BOOL:
         processor = BooleanValueProcessor;
         break;
-      case 15:
-        processor = IntValueProcessor;
-        break;
-      case 16:
+      case RTEDataType_3_14__5_9.NUM:
         processor = FloatValueProcessor;
         break;
-      case 17:
+      case RTEDataType_3_14__5_9.INT:
+        processor = IntValueProcessor;
+        break;
+      case RTEDataType_3_14__5_9.FLOAT:
+        processor = FloatValueProcessor;
+        break;
+      case RTEDataType_3_14__5_9.LIST:
         processor = ListValueProcessor;
         break;
-      case 18:
+      case RTEDataType_3_14__5_9.MATRIX:
         processor = MatrixValueProcessor;
         break;
     }
@@ -270,31 +325,31 @@ export const getVariableValueProcessor = (
 
   if (processor === undefined) {
     switch (type) {
-      case 0:
+      case RTEDataType_3_3__5_0.NONE:
         processor = NoneValueProcessor;
         break;
-      case 3:
+      case RTEDataType_3_3__5_0.CONST_STRING:
         processor = StringValueProcessor;
         break;
-      case 4:
+      case RTEDataType_3_3__5_0.VAR_STRING:
         processor = StringValueProcessor;
         break;
-      case 5:
+      case RTEDataType_3_3__5_0.LIST:
         processor = ListValueProcessor;
         break;
-      case 10:
+      case RTEDataType_3_3__5_0.POSE:
         processor = PoseValueProcessor;
         break;
-      case 12:
+      case RTEDataType_3_3__5_0.BOOL:
         processor = BooleanValueProcessor;
         break;
-      case 13:
+      case RTEDataType_3_3__5_0.NUM:
         processor = FloatValueProcessor;
         break;
-      case 14:
+      case RTEDataType_3_3__5_0.INT:
         processor = IntValueProcessor;
         break;
-      case 15:
+      case RTEDataType_3_3__5_0.FLOAT:
         processor = FloatValueProcessor;
         break;
     }
@@ -317,18 +372,24 @@ export const getVariableSize = (
     return size;
   }
 
-  if (semver.satisfies(version, '>=3.14.1 <5.0.0 || >= 5.9.1')) {
+  if (semver.satisfies(version, '>=3.14 <5.0 || >= 5.9')) {
     switch (type) {
-      case 12:
+      case RTEDataType_3_14__5_9.NONE:
+        size = 0;
+        break;
+      case RTEDataType_3_14__5_9.POSE:
         size = 24;
         break;
-      case 13:
+      case RTEDataType_3_14__5_9.BOOL:
         size = 1;
         break;
-      case 15:
+      case RTEDataType_3_14__5_9.NUM:
         size = 4;
         break;
-      case 16:
+      case RTEDataType_3_14__5_9.INT:
+        size = 4;
+        break;
+      case RTEDataType_3_14__5_9.FLOAT:
         size = 4;
         break;
     }
@@ -336,22 +397,22 @@ export const getVariableSize = (
 
   if (size === undefined) {
     switch (type) {
-      case 0:
+      case RTEDataType_3_3__5_0.NONE:
         size = 0;
         break;
-      case 10:
+      case RTEDataType_3_3__5_0.POSE:
         size = 24;
         break;
-      case 12:
+      case RTEDataType_3_3__5_0.BOOL:
         size = 1;
         break;
-      case 13:
+      case RTEDataType_3_3__5_0.NUM:
         size = 4;
         break;
-      case 14:
+      case RTEDataType_3_3__5_0.INT:
         size = 4;
         break;
-      case 15:
+      case RTEDataType_3_3__5_0.FLOAT:
         size = 4;
         break;
     }

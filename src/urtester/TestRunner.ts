@@ -1,8 +1,6 @@
 import chalk from 'chalk';
 import { createServer, Server, Socket } from 'net';
 import * as Rx from 'rxjs';
-import { RTERobotCommMessage } from '../client/rte/messages/RTERobotMessage';
-import { IRealtimeMessage } from '../client/rte/rte.types';
 import { logger } from '../util/logger';
 import {
   ITestFile,
@@ -10,6 +8,8 @@ import {
   ITestRunner,
   ITestRunnerConfig,
 } from './types';
+import { RealtimeMessage } from '../client/realtime/realtime-client.types';
+import { RTERobotCommMessage } from '../client/realtime/rte/messages/RTERobotMessage';
 
 enum IInternalTestMessageType {
   EXECUTION_STARTED = 'EXECUTION_STARTED',
@@ -251,7 +251,7 @@ export class TestRunner implements ITestRunner {
   }
 
   private async handleRealtimeMessage(
-    message: IRealtimeMessage
+    message: RealtimeMessage
   ): Promise<void> {
     if (message instanceof RTERobotCommMessage) {
       const messageHandler = this.config.runner.getConfig().messageHandler;

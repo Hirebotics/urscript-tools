@@ -1,5 +1,5 @@
 import * as glob from 'glob';
-import { difference, isArray, mergeWith, uniq } from 'lodash';
+import { difference, isArray, mergeWith, uniq, reverse } from 'lodash';
 
 import { FilePattern, IBundleSource } from '../bundler/types';
 

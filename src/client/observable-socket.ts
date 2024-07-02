@@ -1,50 +1,28 @@
 import * as net from 'net';
 import reconnect from 'reconnect-net';
-import * as Rx from 'rxjs';
-import { logger } from '../../util/logger';
+import { ReplaySubject, Subject, Subscription } from 'rxjs';
+import { logger } from '../util/logger';
+import {
+  ObservableSocket,
+  SocketConnection,
+  SocketMessage,
+  SocketOptions,
+} from './observable-socket.types';
 
-export interface ISocketOptions {
-  host: string;
-  port: number;
-  retryDelay: number;
-  maxDelay: number;
-  timeout: number;
-}
-
-interface ISocketReconnectData {
-  attempt: number;
-  delay: number;
-}
-
-export interface ISocketMessage {
-  eventType: 'connect' | 'disconnect' | 'reconnect' | 'data' | 'timeout';
-  data?: Buffer;
-  reconnectData?: ISocketReconnectData;
-}
-
-export interface ISocketConnection {
-  receiver$: Rx.Observable<ISocketMessage>;
-  sender$: Rx.Subject<Buffer>;
-}
-
-export interface IObservableSocket {
-  connect(): ISocketConnection;
-  disconnect(): void;
-}
-
-export class ObservableSocket {
-  private options: ISocketOptions;
-  private socket: net.Socket | null;
+export class ObservableSocketImpl implements ObservableSocket {
+  private options: SocketOptions;
+  private socket: net.Socket | null | undefined;
 
   // use a replay subject since no one might be subscribed yet
   // configure the buffer size as 1 so the last attempted message can be
   // sent to the socket
-  private receiver$: Rx.Subject<ISocketMessage>;
-  private sender$: Rx.Subject<Buffer>;
+  private receiver$: Subject<SocketMessage> | undefined;
+  private sender$: Subject<Buffer> | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private reconnect: any | null;
-  private senderSubscription: Rx.Subscription;
+  private senderSubscription: Subscription | undefined;
 
-  constructor(options: ISocketOptions) {
+  constructor(options: SocketOptions) {
     logger.info('creating observable socket', {
       options,
     });
@@ -52,13 +30,13 @@ export class ObservableSocket {
     this.options = options;
   }
 
-  public connect(): ISocketConnection {
+  public connect(): SocketConnection {
     const { retryDelay, maxDelay } = this.options;
 
     this.completeObservables();
 
-    this.receiver$ = new Rx.ReplaySubject(1);
-    this.sender$ = new Rx.ReplaySubject(1);
+    this.receiver$ = new ReplaySubject(1);
+    this.sender$ = new ReplaySubject(1);
 
     const receiver$ = this.receiver$;
 
@@ -83,7 +61,7 @@ export class ObservableSocket {
           eventType: 'connect',
         });
       })
-      .on('reconnect', function (attempt, delay) {
+      .on('reconnect', function (attempt: number, delay: number) {
         logger.info('attempting socket reconnect', {
           attempt,
           delay,
@@ -96,12 +74,12 @@ export class ObservableSocket {
           },
         });
       })
-      .on('disconnect', function (err) {
+      .on('disconnect', function (err?: Error) {
         logger.info('socket disconnected', {
           errorMessage: err ? err?.message : null,
         });
       })
-      .on('error', function (err) {
+      .on('error', function (err: Error) {
         logger.warn('error occurred in socket', {
           errorMessage: err ? err?.message : null,
         });
@@ -159,7 +137,7 @@ export class ObservableSocket {
 
     this.socket.setTimeout(this.options.timeout, () => {
       logger.info('socket request timed out');
-      this.receiver$.next({
+      this.receiver$?.next({
         eventType: 'timeout',
       });
 
@@ -172,7 +150,7 @@ export class ObservableSocket {
     });
 
     this.socket.on('data', (data) => {
-      this.receiver$.next({
+      this.receiver$?.next({
         eventType: 'data',
         data,
       });
@@ -180,7 +158,7 @@ export class ObservableSocket {
 
     this.socket.on('close', () => {
       logger.info('socket connection closed. dispatching disconnect event.');
-      this.receiver$.next({
+      this.receiver$?.next({
         eventType: 'disconnect',
       });
     });
@@ -193,7 +171,7 @@ export class ObservableSocket {
       this.senderSubscription.unsubscribe();
     }
 
-    this.senderSubscription = this.sender$.subscribe((buffer) => {
+    this.senderSubscription = this.sender$?.subscribe((buffer) => {
       if (this.socket) {
         this.socket.write(buffer, (_err) => {
           // do nothing

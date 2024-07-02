@@ -1,48 +1,41 @@
-import * as Rx from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { Observable, Subject, Subscription } from 'rxjs';
+import { debounceTime, filter } from 'rxjs/operators';
 import { logger } from '../../util/logger';
+import { ObservableSocketImpl } from '../observable-socket';
 import {
-  IObservableSocket,
-  ISocketConnection,
-  ISocketMessage,
-  ISocketOptions,
   ObservableSocket,
-} from '../socket/ObservableSocket';
+  SocketConnection,
+  SocketMessage,
+  SocketOptions,
+} from '../observable-socket.types';
 import {
-  IRealtimeMessage,
+  MessageScope,
+  RealtimeClient,
+  RealtimeClientOptions,
   RealtimeConnectionState,
-  RealtimeConnectionStateChange,
-} from './rte.types';
+  RealtimeMessage,
+} from './realtime-client.types';
+import { RealtimeConnectionStateChange } from './realtime.messages';
 
-export interface IRealtimeClientOptions {
-  host: string;
-  port: number;
-  retryDelay?: number;
-  retryMaxDelay?: number;
-  connectionTimeout?: number;
-  customSocket?: IObservableSocket;
-}
-
-export abstract class AbstractRealtimeClient {
-  protected options: IRealtimeClientOptions;
+abstract class AbstractRealtimeClient implements RealtimeClient {
+  protected options: RealtimeClientOptions;
   protected serviceName: string;
 
-  protected observableSocket: IObservableSocket;
-  protected messageSubject$: Rx.Subject<IRealtimeMessage>;
+  protected observableSocket: ObservableSocket;
+  protected messageSubject$: Subject<RealtimeMessage>;
 
-  protected _connectionState: RealtimeConnectionState;
-  protected connectionStateSubject$: Rx.Subject<ISocketMessage>;
+  protected _connectionState!: RealtimeConnectionState;
+  protected connectionStateSubject$: Subject<SocketMessage>;
 
-  protected socketReceiverSubscription: Rx.Subscription;
+  protected socketReceiverSubscription: Subscription | undefined;
+  protected socketConnection: SocketConnection | undefined;
 
-  protected socketConnection: ISocketConnection;
-
-  constructor(serviceName: string, options: IRealtimeClientOptions) {
+  constructor(serviceName: string, options: RealtimeClientOptions) {
     this.serviceName = serviceName;
     this.options = options;
     this.connectionState = RealtimeConnectionState.DISCONNECTED;
 
-    const socketOptions: ISocketOptions = {
+    const socketOptions: SocketOptions = {
       host: options.host,
       port: options.port,
       retryDelay: options.retryDelay || 5000,
@@ -53,18 +46,18 @@ export abstract class AbstractRealtimeClient {
     if (options.customSocket) {
       this.observableSocket = options.customSocket;
     } else {
-      this.observableSocket = new ObservableSocket(socketOptions);
+      this.observableSocket = new ObservableSocketImpl(socketOptions);
     }
 
     // subject dedicated to state changes
-    this.connectionStateSubject$ = new Rx.Subject();
+    this.connectionStateSubject$ = new Subject();
 
     // create subject that we will use to send transformed
     // messages onto an observer that others can subscribe to
-    this.messageSubject$ = new Rx.Subject();
+    this.messageSubject$ = new Subject();
   }
 
-  public connect(): Rx.Observable<IRealtimeMessage> {
+  public connect(): Observable<RealtimeMessage> {
     logger.info('connecting to realtime service', {
       options: this.options,
       serviceName: this.serviceName,
@@ -85,7 +78,11 @@ export abstract class AbstractRealtimeClient {
     // start the socket
     this.resetSocket();
 
-    return this.messageSubject$.asObservable();
+    // filter all other types of messages from observable since
+    // it is used for internal communication
+    return this.messageSubject$.pipe(
+      filter((value) => value.scope === MessageScope.PUBLIC)
+    ) as Observable<RealtimeMessage>;
   }
 
   public async disconnect(): Promise<void> {
@@ -101,7 +98,7 @@ export abstract class AbstractRealtimeClient {
     return this._connectionState;
   }
 
-  protected abstract receive(message: ISocketMessage): void;
+  protected abstract receive(message: SocketMessage): void;
 
   protected set connectionState(connectionState: RealtimeConnectionState) {
     if (this._connectionState !== connectionState) {
@@ -144,7 +141,7 @@ export abstract class AbstractRealtimeClient {
     );
   }
 
-  private handleData(message: ISocketMessage): void {
+  private handleData(message: SocketMessage): void {
     // send connection state events through internal subject to manage overall
     // state
     if (message.eventType !== 'data') {
@@ -154,3 +151,5 @@ export abstract class AbstractRealtimeClient {
     this.receive(message);
   }
 }
+
+export { AbstractRealtimeClient };
